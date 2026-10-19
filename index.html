@@ -380,6 +380,50 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
 }
 @media(prefers-reduced-motion:reduce){.screen.active{animation:none}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
+
+/* FIX: keep screen titles and achievement progress visible on mobile */
+.screenhead{
+ display:grid!important;
+ grid-template-columns:max-content minmax(0,1fr) max-content!important;
+ align-items:center!important;
+ gap:clamp(6px,2vw,12px)!important;
+ width:100%!important;
+ min-width:0!important;
+}
+.screenhead h1{
+ display:block!important;
+ min-width:0!important;
+ width:100%!important;
+ overflow:visible!important;
+ white-space:nowrap!important;
+ text-overflow:clip!important;
+ font-size:clamp(23px,5.8vw,42px)!important;
+ line-height:1.12!important;
+ text-align:center!important;
+ letter-spacing:-.3px!important;
+}
+.screenhead .balance{
+ display:block!important;
+ min-width:42px!important;
+ white-space:nowrap!important;
+ overflow:visible!important;
+ font-size:clamp(20px,5vw,29px)!important;
+ line-height:1.1!important;
+ text-align:right!important;
+}
+.screenhead .backbtn{
+ min-width:0!important;
+ padding:9px 10px!important;
+ font-size:clamp(14px,3.7vw,20px)!important;
+ white-space:nowrap!important;
+}
+@media(max-width:390px){
+ .screenhead{grid-template-columns:max-content minmax(0,1fr) max-content!important;gap:5px!important}
+ .screenhead h1{font-size:clamp(21px,5.6vw,27px)!important;letter-spacing:-.5px!important}
+ .screenhead .balance{font-size:20px!important;min-width:35px!important}
+ .screenhead .backbtn{padding:8px 8px!important;font-size:14px!important}
+}
+
 </style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
 <body>
 <main class="app" id="app">
