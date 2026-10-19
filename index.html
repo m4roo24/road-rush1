@@ -482,8 +482,7 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
 <p id="roadAuthStatus" class="setting-note" role="status" aria-live="polite">Email/password signup and sign-in require a six-digit email verification code.</p>
 <p id="roadAuthUser" class="setting-note"></p>
 </div>
-<div style="font-size:13px;color:#b9bad1;margin:8px 0">Legacy game-server save account (optional)</div>
-<label for="accountUsername">USERNAME</label><input id="accountUsername" maxlength="20" autocomplete="username" placeholder="Choose a username (3–20 characters)"><label for="accountPassword">PASSWORD</label><input id="accountPassword" type="password" minlength="8" autocomplete="current-password" placeholder="At least 8 characters"><label for="apiServerUrl">GAME SERVER URL <span>(leave blank if hosted together)</span></label><input id="apiServerUrl" type="url" placeholder="https://your-game-server.example"><div class="account-actions"><button class="bigbtn yellow" id="loginBtn" onclick="accountAction('login')">SIGN IN</button><button class="action blue" id="registerBtn" onclick="accountAction('register')">CREATE ACCOUNT</button></div><button class="smallbtn gray" onclick="saveApiServerUrl()">Save server address</button><button class="smallbtn pink" id="logoutBtn" onclick="logoutAccount()" style="display:none">SIGN OUT</button><p id="accountStatus" class="setting-note" aria-live="polite">Your local save remains available if you play offline.</p></div></div>
+<button class="smallbtn pink" onclick="roadFirebaseSignOut()" style="width:100%;margin-top:10px">SIGN OUT OF FIREBASE</button></div></div>
 
 <script>
 (()=>{
@@ -853,9 +852,18 @@ updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJo
  setTimeout(addCockpit,0);
 })();
 </script>
+<div id="roadNameModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:20px">
+<div role="dialog" aria-modal="true" aria-labelledby="roadNameTitle" style="width:min(100%,420px);background:#171a2a;color:#fff;border:1px solid #59618c;border-radius:20px;padding:24px;box-shadow:0 24px 80px #0009">
+<h2 id="roadNameTitle" style="margin:0 0 8px">What should we call you?</h2>
+<p style="color:#c3c7dd;margin:0 0 18px">Add your driver name to your Road Rush account.</p>
+<label for="roadDisplayName">YOUR NAME</label>
+<input id="roadDisplayName" maxlength="60" autocomplete="name" placeholder="Enter your name" style="width:100%;box-sizing:border-box;margin:8px 0 14px;padding:13px;border-radius:10px">
+<p id="roadNameError" role="alert" style="color:#ff8b9b;display:none"></p>
+<button id="roadNameSave" class="bigbtn yellow" style="width:100%" onclick="roadSaveName()">SAVE NAME</button>
+</div></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdToken } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdToken, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
 // Replace these values with your Firebase web-app config from Firebase Console.
@@ -868,7 +876,7 @@ const firebaseConfig = {
   appId: "1:400493851121:web:784ea517c01b9277c1d450",
   measurementId: "G-SS4ZCYGC1W"
 };
-let roadAuth = null, roadFunctions = null, roadOtpPending = false;
+let roadAuth = null, roadFunctions = null, roadOtpPending = false, roadNameResolve = null;
 const roadAuthStatus = (message, error = false) => {
   const el = document.getElementById("roadAuthStatus");
   if (el) { el.textContent = message; el.style.color = error ? "#ff8b9b" : "#b9bad1"; }
@@ -888,7 +896,7 @@ function initRoadAuth() {
     roadFunctions = getFunctions(app, "us-central1");
     onAuthStateChanged(roadAuth, user => {
       const label = document.getElementById("roadAuthUser");
-      if (label) label.textContent = user ? "Firebase signed in as " + (user.email || user.displayName || "Google user") : "Not signed in to Firebase.";
+      if (label) label.textContent = user ? "Driver: " + (user.displayName || user.email || "Firebase user") : "Not signed in to Firebase.";
     });
     return true;
   } catch (error) {
@@ -913,6 +921,7 @@ window.roadEmailAuth = async function(mode) {
   try {
     if (mode === "signup") await createUserWithEmailAndPassword(roadAuth, email, password);
     else await signInWithEmailAndPassword(roadAuth, email, password);
+    await roadAskForName();
     await roadSendOtp();
   } catch (error) {
     const messages = {
@@ -929,12 +938,12 @@ window.roadGoogleSignIn = async function() {
   if (!roadAuth && !initRoadAuth()) return;
   try {
     const result = await signInWithPopup(roadAuth, new GoogleAuthProvider());
-    const tokenResult = await result.user.getIdTokenResult(true);
+    const name = await roadAskForName();
     document.getElementById("roadOtpArea").style.display = "none";
     roadOtpPending = false;
-    roadAuthStatus("Signed in with Google as " + (result.user.email || result.user.displayName) + ". Email OTP is not required for Google sign-in.");
+    roadAuthStatus("Welcome, " + name + "! You are signed in with Google. Email OTP is not required for Google sign-in.");
     const user = document.getElementById("roadAuthUser");
-    if (user) user.textContent = "Firebase account connected. Google sign-in completed.";
+    if (user) user.textContent = "Driver name: " + name;
   } catch (error) {
     roadAuthStatus(error.message || "Google sign-in failed.", true);
   }
@@ -949,12 +958,51 @@ window.roadVerifyOtp = async function() {
     await getIdToken(roadAuth.currentUser, true);
     roadOtpPending = false;
     document.getElementById("roadOtpArea").style.display = "none";
-    roadAuthStatus("Email OTP verified. Your Firebase account is verified for this session.");
+    roadAuthStatus("Welcome, " + (roadAuth.currentUser.displayName || roadAuth.currentUser.email) + "! Your email code is verified.");
   } catch (error) { roadAuthStatus(error.message || "That code is invalid or expired.", true); }
 };
 window.roadResendOtp = async function() {
   if (!roadAuth || !roadAuth.currentUser) return roadAuthStatus("Sign in first to request a code.", true);
   try { await roadSendOtp(); } catch (error) { roadAuthStatus(error.message || "Could not send a new code.", true); }
+};
+window.roadAskForName = function() {
+  const modal = document.getElementById("roadNameModal");
+  const input = document.getElementById("roadDisplayName");
+  const error = document.getElementById("roadNameError");
+  input.value = roadAuth?.currentUser?.displayName || "";
+  error.style.display = "none";
+  modal.style.display = "flex";
+  setTimeout(() => input.focus(), 30);
+  return new Promise(resolve => { roadNameResolve = resolve; });
+};
+window.roadSaveName = async function() {
+  const input = document.getElementById("roadDisplayName");
+  const name = input.value.trim();
+  const error = document.getElementById("roadNameError");
+  const button = document.getElementById("roadNameSave");
+  if (name.length < 2 || name.length > 60) {
+    error.textContent = "Enter a name between 2 and 60 characters.";
+    error.style.display = "block";
+    return;
+  }
+  if (!roadAuth?.currentUser) {
+    error.textContent = "Please sign in again.";
+    error.style.display = "block";
+    return;
+  }
+  button.disabled = true;
+  try {
+    await updateProfile(roadAuth.currentUser, { displayName: name });
+    document.getElementById("roadNameModal").style.display = "none";
+    const user = document.getElementById("roadAuthUser");
+    if (user) user.textContent = "Driver name: " + name;
+    const resolve = roadNameResolve;
+    roadNameResolve = null;
+    if (resolve) resolve(name);
+  } catch (e) {
+    error.textContent = e.message || "Could not save your name.";
+    error.style.display = "block";
+  } finally { button.disabled = false; }
 };
 window.roadFirebaseSignOut = async function() {
   if (roadAuth) await signOut(roadAuth);
