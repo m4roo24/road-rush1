@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#101827"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="Road Rush is an endless highway driving game. Dodge traffic, collect cash, and unlock new vehicles and roads."><title>ROAD RUSH — Endless Highway</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#101113"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="Road Rush is an endless highway driving game. Dodge traffic, collect cash, and unlock new vehicles and roads."><title>ROAD RUSH — Endless Highway</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900;1000&family=Lilita+One&display=swap');
 :root{--bg:#191e36;--panel:#1d223d;--ink:#080d20;--white:#fffaf0;--muted:#b9bad1;--yellow:#ffc31b;--green:#4be29b;--blue:#3c80ff;--pink:#ff4a9a;--orange:#ff792a;--purple:#9254ff;--teal:#13afa7}
@@ -248,6 +248,139 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;ba
 .race-invite-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .race-invite-actions .action{margin:0!important;min-width:0;padding:10px 8px;font-size:12px;letter-spacing:.1px}
 @media(max-width:420px){.race-invite-actions{grid-template-columns:1fr}.race-invite-actions .action{min-height:48px}}
+
+/* PREMIUM REDESIGN 2026 — visual layer only; game logic and canvas remain unchanged */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
+:root{
+ --bg:#101113;--panel:#191b1f;--ink:#090a0b;--white:#f5f3ee;--muted:#a5a7ad;
+ --yellow:#d6b36a;--green:#a8c2a0;--blue:#9eb5c8;--pink:#c49ba0;--orange:#d0a878;
+ --purple:#aaa1bd;--teal:#9dbbb7;--premium-border:#34363b;--premium-soft:#222429;
+}
+html,body{background:#101113!important;color:#f5f3ee;font-family:'DM Sans',system-ui,sans-serif;font-weight:500}
+body{background:radial-gradient(ellipse at 50% -10%,#292b2f 0%,#141517 44%,#0d0e10 100%)!important}
+button{font-family:'DM Sans',system-ui,sans-serif;font-weight:700;letter-spacing:.01em}
+button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
+.app{max-width:760px;min-height:100dvh;padding:clamp(16px,4vw,30px);background:transparent!important;border:0!important;box-shadow:none!important}
+.screen.active{animation:premiumFade .22s ease-out}
+@keyframes premiumFade{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.brandrow{margin:0 0 clamp(24px,5vw,38px);padding:8px 0 16px;border-bottom:1px solid #303136}
+.smallbrand{font-family:'Barlow Condensed',sans-serif;font-size:24px;letter-spacing:1.8px;color:#f3f0e8}
+.smallbrand span{color:#d6b36a}
+.brand-logo{width:36px;height:36px;filter:none}
+.save{color:#c8c8c4;font-size:12px;text-decoration:none;border:1px solid #3b3d42;border-radius:999px;padding:10px 14px;background:#1c1d20;max-width:58%;line-height:1.25}
+.save:hover{background:#282a2e;border-color:#55575c}
+.hero-title{gap:10px;margin:12px 0 10px;font-family:'Barlow Condensed',sans-serif;font-size:clamp(58px,13vw,100px);font-weight:900;letter-spacing:-1.5px;line-height:.88;text-shadow:none}
+.hero-title .roadword{color:#f5f3ee}
+.hero-title .runword{background:#d6b36a;color:#15130f;border:0;border-radius:8px;padding:5px 13px 8px;transform:skew(-5deg);box-shadow:none}
+.subtitle{color:#9b9da3;letter-spacing:2.2px;font-size:11px;font-weight:700;margin:18px 0 28px}
+.vehicle-card{background:linear-gradient(145deg,#202226,#17181b)!important;border:1px solid #37393e!important;border-radius:22px!important;padding:clamp(16px,4vw,26px)!important;box-shadow:0 16px 38px #0005!important;margin-bottom:16px}
+.truckstage{height:clamp(140px,34vw,200px)}
+.truckstage svg{filter:drop-shadow(0 14px 14px #0008)}
+.veh-meta{font-size:10px;color:#9fa1a6;letter-spacing:2px;font-weight:800}
+.veh-name-row{margin:8px 0 14px}
+.veh-name{font-family:'Barlow Condensed',sans-serif;font-size:clamp(35px,8vw,50px);font-weight:800;letter-spacing:.3px}
+.cash{color:#c6d4bf;font-family:'Barlow Condensed',sans-serif;font-size:clamp(28px,6vw,38px)}
+.pill{background:#24262a;color:#d1d0ca;border:1px solid #3a3c40;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:700}
+.pill.green{color:#c6d4bf}
+.banner{border:1px solid #3b3d42;border-radius:18px;box-shadow:0 8px 20px #0002,inset 0 1px #ffffff0a;padding:15px 17px;margin-bottom:12px;min-height:90px}
+.banner .bi{font-size:30px;filter:none}
+.banner b{font-family:'Barlow Condensed',sans-serif;font-size:clamp(23px,5vw,32px);font-weight:800;letter-spacing:.3px}
+.banner small{font-size:12px;color:inherit;opacity:.78;font-weight:500}
+.gift{background:linear-gradient(110deg,#bda066,#dfc68f)!important;color:#201b11!important}
+.challenge{background:linear-gradient(110deg,#38323a,#29282d)!important;color:#f0e8e8!important}
+.week{border:1px solid #383a3f;background:#191a1d;border-radius:18px;padding:16px 18px;margin:16px 0}
+.week b{font-size:14px}.week b span{color:#d6b36a}.week small{color:#9b9da3;font-size:12px}
+.bigbtn,.action,.navbtn,.tab,.smallbtn{border:1px solid #44464b;border-radius:14px;box-shadow:none!important;min-height:58px;padding:13px 16px;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;font-weight:800;letter-spacing:.2px;transition:transform .12s ease,background .12s ease,border-color .12s ease}
+.bigbtn:active,.action:active,.navbtn:active,.tab:active,.smallbtn:active{transform:scale(.985);box-shadow:none!important}
+.yellow,.gold{background:#d6b36a!important;color:#17140e!important;border-color:#d6b36a!important}
+.blue,.navy{background:#282b30!important;color:#f1f0eb!important;border-color:#42444a!important}
+.green{background:#c3d0bb!important;color:#171a15!important;border-color:#c3d0bb!important}
+.orange{background:#c8a77a!important;color:#1c1710!important;border-color:#c8a77a!important}
+.purple{background:#34313b!important;color:#eee9f3!important;border-color:#4a4653!important}
+.teal{background:#2d3837!important;color:#e3efeb!important;border-color:#455451!important}
+.pink{background:#3b2d30!important;color:#f4e7e8!important;border-color:#594347!important}
+.gray{background:#25272b!important;color:#eeede8!important;border-color:#3d3f44!important}
+.navgrid{gap:10px;margin:16px 0 20px}
+.navbtn{min-height:78px;justify-content:flex-start;text-align:left;font-size:13px;padding:13px;border-radius:16px;background:linear-gradient(145deg,#222428,#191a1d)!important;border-color:#37393e!important;color:#f3f1eb!important}
+.navbtn:hover{background:#2a2c30!important;border-color:#57595f!important;transform:translateY(-1px)}
+.navbtn .navicon{width:42px;height:42px;border-radius:12px;background:#303237;box-shadow:none;font-size:22px;filter:saturate(.55)}
+.navbtn .navtxt{font-weight:800}
+.navbtn .count{background:#d6b36a;color:#1a160e;border-radius:999px;padding:4px 7px;font-size:11px}
+.navbtn.wide,.wide{min-height:68px}
+.statsrow{gap:8px;margin:18px 0 24px}
+.statbox{border:1px solid #35373c;border-radius:15px;background:#191a1d;min-height:78px;padding:12px 8px;box-shadow:none}
+.statbox b{font-family:'Barlow Condensed',sans-serif;font-size:clamp(23px,4.6vw,31px);font-weight:800;color:#f4f0e7}
+.statbox small{font-size:9px;letter-spacing:1px;color:#9c9ea4;font-weight:700}
+.footerlinks{color:#8f9197;font-size:11px;border-top:1px solid #2c2e32;margin-top:24px;padding-top:18px}
+.footerlinks button{color:#bdbfc3}
+.screenhead{grid-template-columns:94px 1fr 78px;gap:8px;margin:5px 0 24px}
+.screenhead h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(32px,7vw,46px);font-weight:800;letter-spacing:.5px;text-shadow:none}
+.backbtn{border:1px solid #414348;background:#202226;border-radius:12px;box-shadow:none;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:800}
+.backbtn:hover{background:#2b2d31}
+.balance{font-family:'Barlow Condensed',sans-serif;font-size:28px;color:#c6d4bf}
+.tabs{gap:8px;padding:3px 1px 13px}
+.tab{min-height:43px;border-radius:999px;padding:9px 16px;font-size:12px;background:#202226;border-color:#3b3d42;color:#c6c6c1}
+.tab.selected{background:#d6b36a;color:#17140e;border-color:#d6b36a}
+.tab small{font-size:10px}
+.mutednote{color:#999ba1;font-size:12px}
+.maplist{gap:10px}
+.mapcard{grid-template-columns:86px minmax(0,1fr) auto;gap:12px;padding:12px;border:1px solid #383a3f;border-radius:17px;background:#1a1b1e;box-shadow:none;min-height:116px}
+.mapcard.selected{border-color:#d6b36a;box-shadow:inset 0 0 0 1px #d6b36a}
+.mapart{width:82px;height:92px;border:1px solid #44464b;border-radius:12px}
+.mapname{font-family:'Barlow Condensed',sans-serif;font-size:25px;font-weight:800}
+.country{color:#d6b36a;font-size:9px;letter-spacing:1.4px;font-weight:800}
+.mapdesc{color:#a5a7ad;font-size:11px;line-height:1.45}
+.buybtn{border:1px solid #45474c;border-radius:11px;box-shadow:none;background:#2a2c30;color:#f4f1e8;font-size:11px;font-weight:800;padding:10px}
+.buybtn.owned{background:#d6b36a;color:#19160f;border-color:#d6b36a}
+.optionrow,.settings-note{border-color:#37393e!important;background:#1b1c1f!important;border-radius:14px!important}
+.optionrow{padding:14px!important}
+.optionrow b{color:#f1efe9}
+.setting-note,.muted,.hint{color:#a5a7ad}
+.gameview{background:#090a0b}
+.gamehud{padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 0}
+.hudmain{background:#111316eF;border:1px solid #55504a;border-radius:15px;padding:11px 13px;box-shadow:0 8px 25px #0005;backdrop-filter:blur(10px)}
+.hudmoney{font-family:'Barlow Condensed',sans-serif;font-size:27px;font-weight:800;color:#f5f0e4}
+.hudcash-icon{filter:grayscale(.7);font-size:18px}
+.hudsub{color:#c0c1c4;font-size:11px;font-weight:700}
+.fuelrow{gap:8px}.fuel{height:5px;background:#393b3f;border-radius:99px;overflow:hidden}.fuel i{border-radius:99px}
+.magnet-hud{background:#202226!important;border:1px solid #4a4c51!important;color:#e6dfcf!important;border-radius:9px;padding:6px 9px;font-size:10px;letter-spacing:.3px}
+.boost-hud{background:#282b30!important;border-color:#57595f!important;color:#f0eee7!important}
+.pausebtn{width:44px;height:44px;border:1px solid #5a5c61;border-radius:13px;background:#151619eF;box-shadow:none;font-size:18px;backdrop-filter:blur(8px)}
+.tutorial,.lanehint{background:#111316d9;border:1px solid #494b50;border-radius:10px;color:#f0eee7;box-shadow:none;font-size:11px;backdrop-filter:blur(8px)}
+.distancehint{background:#101113aa;color:#d0d0cc}
+.drivebuttons button{background:#181a1dd9!important;border:1px solid #77736a!important;border-radius:18px!important;box-shadow:none!important;color:#f4e7c5!important;backdrop-filter:blur(8px)}
+.gameoverlay{background:#08090bd9;backdrop-filter:blur(9px)}
+.overlaypanel{background:linear-gradient(145deg,#222428,#17181b)!important;border:1px solid #4a4c50!important;border-radius:22px!important;box-shadow:0 24px 70px #0009!important;padding:clamp(20px,5vw,30px)!important}
+.overlaypanel h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(38px,9vw,52px);font-weight:800;letter-spacing:.4px;color:#f5f1e8}
+.overlaypanel p{color:#b4b5b7;font-size:13px;line-height:1.55}
+.overlaypanel .bigbtn{width:100%}
+.overlayactions{gap:9px}
+.overlayactions .action{flex:1}
+.account-backdrop{background:#08090bd9!important;backdrop-filter:blur(10px)}
+.account-panel{background:#1c1d20!important;border:1px solid #45474c!important;border-radius:22px!important;box-shadow:0 24px 70px #0009!important}
+.account-brand{color:#d6b36a!important;letter-spacing:2px}
+.account-panel h2{font-family:'Barlow Condensed',sans-serif;font-size:35px;color:#f5f1e8}
+.account-panel input,.account-panel select{background:#121315!important;color:#f5f1e8!important;border:1px solid #45474c!important;border-radius:10px!important}
+@media(max-width:420px){
+ .app{padding:14px 13px 24px}
+ .brandrow{margin-bottom:22px}
+ .save{font-size:10px;padding:8px 10px}
+ .hero-title{font-size:clamp(54px,14vw,70px)}
+ .vehicle-card{border-radius:18px!important}
+ .navgrid{gap:8px}
+ .navbtn{min-height:72px;padding:9px;font-size:11px;gap:8px}
+ .navbtn .navicon{width:36px;height:36px;flex-basis:36px;font-size:19px}
+ .statsrow{gap:5px}
+ .statbox{border-radius:12px;padding:10px 4px}
+ .screenhead{grid-template-columns:75px 1fr 66px}
+ .backbtn{padding:9px 8px;font-size:10px}
+ .mapcard{grid-template-columns:70px minmax(0,1fr) auto;gap:9px;padding:9px}
+ .mapart{width:68px;height:78px}
+ .mapname{font-size:22px}
+ .buybtn{padding:8px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.screen.active{animation:none}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
 </style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
 <body>
 <main class="app" id="app">
