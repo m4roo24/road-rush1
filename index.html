@@ -659,7 +659,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&$('accountModal').classList.
 function restoreGameFromSettings(){if(current==='settings'&&game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');}}
 $('settings').querySelector('.backbtn').addEventListener('click',()=>{if(game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');current='game';resize()}else showScreen('home')});
 // Real-time 1v1 multiplayer race client (Socket.IO server).
-let onlineSocket=null,onlineSocketId='',onlineRoom='',onlinePlayers=new Map(),onlineLastSent=0,onlineResultHandled=false,onlineMatchStarted=false;
+let onlineSocket=null,onlineSocketId='',onlineRoom='',onlinePlayers=new Map(),onlineLastSent=0,onlineResultHandled=false,onlineMatchStarted=false,onlineRunStarted=false;
 function onlineConnected(){return !!onlineSocket&&onlineSocket.connected}
 function raceStatus(message){const el=$('raceStatus');if(el)el.textContent=message}
 function updateOnlineHud(){
@@ -685,20 +685,27 @@ window.connectOnlineRace=function(){
  nameInput.value=username;roomInput.value=roomCode;
  raceStatus('Connecting to race server…');
  if(onlineSocket){try{onlineSocket.disconnect()}catch{}onlineSocket=null}
- onlinePlayers.clear();onlineSocketId='';onlineRoom=roomCode;onlineResultHandled=false;onlineMatchStarted=false;updateOnlineHud();
+ onlinePlayers.clear();onlineSocketId='';onlineRoom=roomCode;onlineResultHandled=false;onlineMatchStarted=false;onlineRunStarted=false;updateOnlineHud();
  onlineSocket=window.io(serverUrl,{transports:['websocket','polling'],timeout:12000,reconnection:false});
  onlineSocket.on('connect',()=>{
   raceStatus('Connected — joining '+roomCode+'…');
   onlineSocket.emit('race:join',{roomCode,username,wallet:Math.max(0,Math.floor(Number(save.cash)||0)),create:createRoom});
  });
+ function launchOnlineRunWhenReady(){
+  if(onlineRunStarted||!onlineConnected()||onlinePlayers.size<2)return;
+  onlineRunStarted=true;raceStatus('Both drivers connected — race starting!');
+  showScreen('home');startRun();$('onlineRaceHud').style.display='block';updateOnlineHud();
+ }
  onlineSocket.on('race:joined',data=>{
   onlineSocketId=onlineSocket.id;onlineRoom=data.roomCode||roomCode;
   onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-  raceStatus('Room '+onlineRoom+' joined. Waiting for both drivers to be ready…');
-  updateOnlineHud();showScreen('home');startRun();$('onlineRaceHud').style.display='block';
+  updateOnlineHud();
+  if(onlinePlayers.size>=2)launchOnlineRunWhenReady();
+  else raceStatus('Room '+onlineRoom+' created. Waiting for your opponent to join before the race starts…');
  });
  onlineSocket.on('race:players',data=>{
-  onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));updateOnlineHud();
+  onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
+  updateOnlineHud();launchOnlineRunWhenReady();
  });
  onlineSocket.on('race:state',player=>{if(player&&player.id){onlinePlayers.set(player.id,player);updateOnlineHud()}});
  onlineSocket.on('race:start',data=>{
