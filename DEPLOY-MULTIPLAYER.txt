@@ -1,15 +1,34 @@
-ROAD RUSH — VERCEL + REAL-TIME MULTIPLAYER
+ROAD RUSH — VERCEL + 1v1 COIN-POT MULTIPLAYER
 
 FRONTEND (VERCEL)
-Upload the root files: index.html, manifest.webmanifest, sw.js, icon.svg, icon-192.png, icon-512.png. Set Framework Preset to Other, no build command, and deploy.
+Deploy the root project as a static site. Use Framework Preset: Other, no build command.
 
 MULTIPLAYER SERVER (RENDER)
-Deploy the multiplayer-server folder as a Node Web Service. Build: npm install. Start: npm start. Environment variable: FRONTEND_ORIGIN=https://YOUR-VERCEL-PROJECT.vercel.app
+Deploy the multiplayer-server folder as a Node Web Service.
+Build command: npm install
+Start command: npm start
+Environment variable:
+FRONTEND_ORIGIN=https://YOUR-VERCEL-PROJECT.vercel.app
 
-After deploy, verify https://YOUR-RENDER-SERVICE.onrender.com/health returns {"ok":true,...}.
+After deployment, check:
+https://YOUR-RENDER-SERVICE.onrender.com/health
+It should return JSON with "ok": true.
 
 IN GAME
-Road Rush > Race friends > enter Render URL > driver name > leave room code empty > Create / Join Race. Share the generated room code with your friend; they enter the same server URL and code.
+1. Open ROAD RUSH > Race friends.
+2. Enter the Render server URL and your driver name.
+3. Leave ROOM CODE empty and tap CREATE / JOIN RACE.
+4. Share the generated room code with your opponent.
+5. Your opponent enters the same Render URL and room code.
 
-NOTE
-This first multiplayer version synchronizes live driver positions as ghost cars. It is not full shared-physics racing yet. Rooms are memory-only and clear if the server restarts. Vercel hosts the frontend; the separate Node service holds the WebSocket connection.
+1v1 WINNER-TAKES-LOSER'S COINS
+- A race is one versus one.
+- Once both drivers are racing, crashing ends that player's race.
+- The surviving driver receives the crashed player's current in-game coin balance.
+- The losing player's in-game coin balance becomes zero.
+- A draw transfers no coins.
+- Leaving/disconnecting after the match begins counts as a forfeit.
+- This is an in-game coin feature, not real-money betting.
+
+IMPORTANT
+The server stores room and race state in memory; rooms reset if the service restarts. This basic system uses each browser's reported in-game coin balance, so it is suitable for casual play, not cheat-proof competitive play. Keep the Render multiplayer server deployed separately from the static Vercel frontend.
