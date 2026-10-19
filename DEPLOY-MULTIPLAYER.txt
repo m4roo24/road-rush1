@@ -1,34 +1,35 @@
-ROAD RUSH — VERCEL + 1v1 COIN-POT MULTIPLAYER
+ROAD RUSH — VERCEL FRONTEND + CLOUDFLARE MULTIPLAYER
 
-FRONTEND (VERCEL)
-Deploy the root project as a static site. Use Framework Preset: Other, no build command.
+The game frontend can stay on Vercel. The real-time multiplayer server is a Cloudflare Worker using a Durable Object room. No Render service is needed.
 
-MULTIPLAYER SERVER (RENDER)
-Deploy the multiplayer-server folder as a Node Web Service.
-Build command: npm install
-Start command: npm start
-Environment variable:
-FRONTEND_ORIGIN=https://YOUR-VERCEL-PROJECT.vercel.app
+FILES
+- cloudflare-worker.js: Worker and Durable Object multiplayer room
+- wrangler.jsonc: Durable Object binding and migration configuration
+- index.html: native WebSocket client
 
-After deployment, check:
-https://YOUR-RENDER-SERVICE.onrender.com/health
-It should return JSON with "ok": true.
+DEPLOY THE CLOUDFLARE MULTIPLAYER WORKER
+1. Keep these files in the GitHub repository.
+2. In a terminal with Node.js installed, open the repository root.
+3. Run:
+   npm install --save-dev wrangler
+   npx wrangler login
+   npx wrangler deploy
+4. If Cloudflare asks you to confirm the Durable Object migration/binding, use the configuration in wrangler.jsonc.
+5. Copy the deployed Worker URL. It will look like:
+   https://road-rush-multiplayer.YOUR-SUBDOMAIN.workers.dev
+6. Open https://YOUR-WORKER-URL/health and confirm it returns JSON with "ok": true.
 
-IN GAME
+If you already deploy this project with Wrangler, use the existing Cloudflare workflow and make sure wrangler.jsonc is at the project root.
+
+PLAY
 1. Open ROAD RUSH > Race friends.
-2. Enter the Render server URL and your driver name.
-3. Leave ROOM CODE empty and tap CREATE / JOIN RACE.
-4. Share the generated room code with your opponent.
-5. Your opponent enters the same Render URL and room code.
+2. Paste the Cloudflare Worker URL into Multiplayer Server URL.
+3. Leave the room code empty and tap Create / Join Race.
+4. Share the generated room code with your friend.
+5. Your friend enters the same Worker URL and room code.
 
-1v1 WINNER-TAKES-LOSER'S COINS
-- A race is one versus one.
-- Once both drivers are racing, crashing ends that player's race.
-- The surviving driver receives the crashed player's current in-game coin balance.
-- The losing player's in-game coin balance becomes zero.
-- A draw transfers no coins.
-- Leaving/disconnecting after the match begins counts as a forfeit.
-- This is an in-game coin feature, not real-money betting.
+RACE REWARDS
+The race waits for two connected players. The winner gets a fixed 100 in-game coin bonus. The losing player keeps their own coin balance. A draw awards no bonus. These are game rewards, not real money.
 
 IMPORTANT
-The server stores room and race state in memory; rooms reset if the service restarts. This basic system uses each browser's reported in-game coin balance, so it is suitable for casual play, not cheat-proof competitive play. Keep the Render multiplayer server deployed separately from the static Vercel frontend.
+The Cloudflare Worker must be deployed separately from the static Vercel frontend. This is a basic multiplayer prototype; do not treat client-reported gameplay or coin values as cheat-proof competitive records.
