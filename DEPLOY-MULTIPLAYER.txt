@@ -1,0 +1,15 @@
+ROAD RUSH — VERCEL + REAL-TIME MULTIPLAYER
+
+FRONTEND (VERCEL)
+Upload the root files: index.html, manifest.webmanifest, sw.js, icon.svg, icon-192.png, icon-512.png. Set Framework Preset to Other, no build command, and deploy.
+
+MULTIPLAYER SERVER (RENDER)
+Deploy the multiplayer-server folder as a Node Web Service. Build: npm install. Start: npm start. Environment variable: FRONTEND_ORIGIN=https://YOUR-VERCEL-PROJECT.vercel.app
+
+After deploy, verify https://YOUR-RENDER-SERVICE.onrender.com/health returns {"ok":true,...}.
+
+IN GAME
+Road Rush > Race friends > enter Render URL > driver name > leave room code empty > Create / Join Race. Share the generated room code with your friend; they enter the same server URL and code.
+
+NOTE
+This first multiplayer version synchronizes live driver positions as ghost cars. It is not full shared-physics racing yet. Rooms are memory-only and clear if the server restarts. Vercel hosts the frontend; the separate Node service holds the WebSocket connection.
