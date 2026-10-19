@@ -2,7 +2,7 @@
   "name": "road-rush-multiplayer-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Socket.IO real-time room server for Road Rush multiplayer races",
+  "description": "Socket.IO one-versus-one race server with in-game coin winner payouts",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
