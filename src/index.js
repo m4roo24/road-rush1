@@ -40,9 +40,10 @@ const send = (socket, data) => {
   } catch {}
 };
 
-const broadcast = (data, exceptId = null) => {
-  for (const [socketId, socket] of this.sockets.entries()) {
-    if (socketId !== exceptId) send(socket, data);
+const broadcast = (data, exceptSocket = null) => {
+  // sockets is a Set<WebSocket>, not a Map of [id, socket] pairs.
+  for (const socket of this.sockets) {
+    if (socket !== exceptSocket && socket.readyState === WebSocket.OPEN) send(socket, data);
   }
 };
 
@@ -55,7 +56,7 @@ send(server, {
 broadcast({
   type: "players",
   players: Array.from(this.players.values())
-}, id);
+}, server);
 
 server.addEventListener("message", event => {
   let data;
