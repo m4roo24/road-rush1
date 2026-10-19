@@ -31,6 +31,7 @@ export class RaceRoom {
     this.ctx = ctx;
     this.env = env;
     this.players = new Map();
+    this.sockets = new Set();
     this.started = false;
     this.settled = false;
     this.roomCode = "";
@@ -42,8 +43,8 @@ export class RaceRoom {
     for (const ws of this.ctx.getWebSockets()) this.send(ws, event, data);
   }
   playerList() {
-    return this.ctx.getWebSockets().map(ws => {
-      const a = ws.deserializeAttachment() || {};
+    return [...this.sockets].filter(ws => ws.readyState === 1).map(ws => {
+      const a = ws._rr || {};
       const p = this.players.get(a.id) || a.player || {};
       return { id: a.id, username: p.username || "Driver", lane: p.lane || 1, km: p.km || 0, speed: p.speed || 0, running: !!p.running, lost: !!p.lost, color: p.color || "#42d9ff" };
     });
@@ -52,7 +53,7 @@ export class RaceRoom {
     const url = new URL(request.url);
     const roomCode = url.searchParams.get("roomCode") || "";
     const create = url.searchParams.get("create") === "1";
-    const existing = this.ctx.getWebSockets();
+    const existing = [...this.sockets].filter(ws => ws.readyState === 1);
     if (existing.length === 0 && !create) return new Response("Room not found. Ask the host to create it first.", { status: 404 });
     if (existing.length === 0 && create) this.roomCode = roomCode;
     if (this.settled || existing.length >= 2) return new Response("This room is full or already finished.", { status: 409 });
@@ -62,9 +63,13 @@ export class RaceRoom {
     const username = (url.searchParams.get("username") || "Driver").replace(/[<>\\u0000-\\u001f]/g, "").slice(0, 18) || "Driver";
     const wallet = Math.max(0, Math.min(1e9, Math.floor(Number(url.searchParams.get("wallet")) || 0)));
     const player = { username, lane: 1, km: 0, speed: 0, running: false, lost: false, wallet, color: existing.length ? "#ffce43" : "#42d9ff" };
-    this.ctx.acceptWebSocket(server);
-    server.serializeAttachment({ id, player });
+    server.accept();
+    server._rr = { id, player };
+    this.sockets.add(server);
     this.players.set(id, player);
+    server.addEventListener("message", event => this.webSocketMessage(server, event.data));
+    server.addEventListener("close", () => this.webSocketClose(server));
+    server.addEventListener("error", () => this.webSocketError(server));
     this.send(server, "race:joined", { roomCode, players: this.playerList() });
     this.broadcast("race:players", { roomCode, players: this.playerList() });
     return new Response(null, { status: 101, webSocket: client });
@@ -73,7 +78,7 @@ export class RaceRoom {
     if (typeof message !== "string" || message.length > 12000) return;
     let packet;
     try { packet = JSON.parse(message); } catch { return; }
-    const attachment = ws.deserializeAttachment() || {};
+    const attachment = ws._rr || {};
     const id = attachment.id;
     const player = this.players.get(id);
     if (!player || !packet || typeof packet.event !== "string") return;
@@ -86,7 +91,7 @@ export class RaceRoom {
       player.running = d.running === true;
       player.lost = d.lost === true;
       player.color = typeof d.color === "string" && /^#[0-9a-f]{6}$/i.test(d.color) ? d.color : player.color;
-      ws.serializeAttachment({ id, player });
+      ws._rr = { id, player };
       const all = this.playerList();
       if (!this.started && all.length === 2 && all.every(p => p.running)) {
         this.started = true;
@@ -110,12 +115,13 @@ export class RaceRoom {
     }
   }
   async webSocketClose(ws) {
-    const a = ws.deserializeAttachment() || {};
+    const a = ws._rr || {};
     const id = a.id;
     this.players.delete(id);
-    const others = this.ctx.getWebSockets().filter(s => s !== ws);
+    this.sockets.delete(ws);
+    const others = [...this.sockets].filter(s => s.readyState === 1 && s !== ws);
     if (this.started && !this.settled && others.length === 1) {
-      const winner = others[0].deserializeAttachment() || {};
+      const winner = others[0]._rr || {};
       this.settled = true;
       this.send(others[0], "race:result", { roomCode: this.roomCode, winnerId: winner.id, loserId: id, amount: 100, reason: "opponent-disconnected" });
     }
