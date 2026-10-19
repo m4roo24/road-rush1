@@ -853,4 +853,110 @@ updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJo
  setTimeout(addCockpit,0);
 })();
 </script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdToken } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
+
+// Replace these values with your Firebase web-app config from Firebase Console.
+const firebaseConfig = {
+  apiKey: "REPLACE_WITH_FIREBASE_API_KEY",
+  authDomain: "REPLACE_WITH_PROJECT_ID.firebaseapp.com",
+  projectId: "REPLACE_WITH_PROJECT_ID",
+  appId: "REPLACE_WITH_FIREBASE_APP_ID"
+};
+let roadAuth = null, roadFunctions = null, roadOtpPending = false;
+const roadAuthStatus = (message, error = false) => {
+  const el = document.getElementById("roadAuthStatus");
+  if (el) { el.textContent = message; el.style.color = error ? "#ff8b9b" : "#b9bad1"; }
+};
+const roadAuthConfigured = () => {
+  if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("REPLACE_") || firebaseConfig.projectId.startsWith("REPLACE_")) {
+    roadAuthStatus("Firebase is not configured yet. Follow FIREBASE-AUTH-SETUP.md and add your Firebase web config.", true);
+    return false;
+  }
+  return true;
+};
+function initRoadAuth() {
+  if (!roadAuthConfigured()) return false;
+  try {
+    const app = initializeApp(firebaseConfig);
+    roadAuth = getAuth(app);
+    roadFunctions = getFunctions(app, "us-central1");
+    onAuthStateChanged(roadAuth, user => {
+      const label = document.getElementById("roadAuthUser");
+      if (label) label.textContent = user ? "Firebase signed in as " + (user.email || user.displayName || "Google user") : "Not signed in to Firebase.";
+    });
+    return true;
+  } catch (error) {
+    roadAuthStatus("Firebase initialization failed. Check the web config: " + error.message, true);
+    return false;
+  }
+}
+async function roadSendOtp() {
+  const requestEmailOtp = httpsCallable(roadFunctions, "requestEmailOtp");
+  await requestEmailOtp({});
+  roadOtpPending = true;
+  document.getElementById("roadOtpArea").style.display = "block";
+  roadAuthStatus("A six-digit code was sent to your email. It expires in 10 minutes.");
+}
+window.roadEmailAuth = async function(mode) {
+  if (!roadAuth && !initRoadAuth()) return;
+  const email = document.getElementById("roadAuthEmail").value.trim();
+  const password = document.getElementById("roadAuthPassword").value;
+  if (!email || password.length < 8) return roadAuthStatus("Enter a valid email and a password of at least 8 characters.", true);
+  const buttons = [document.getElementById("roadEmailLogin"), document.getElementById("roadEmailSignup")];
+  buttons.forEach(b => b.disabled = true);
+  try {
+    if (mode === "signup") await createUserWithEmailAndPassword(roadAuth, email, password);
+    else await signInWithEmailAndPassword(roadAuth, email, password);
+    await roadSendOtp();
+  } catch (error) {
+    const messages = {
+      "auth/email-already-in-use":"An account already exists for this email. Sign in instead.",
+      "auth/invalid-credential":"Email or password is incorrect.",
+      "auth/invalid-email":"Enter a valid email address.",
+      "auth/weak-password":"Use a stronger password of at least 8 characters.",
+      "functions/failed-precondition":"Email delivery is not configured on the server yet."
+    };
+    roadAuthStatus(messages[error.code] || error.message || "Authentication failed.", true);
+  } finally { buttons.forEach(b => b.disabled = false); }
+};
+window.roadGoogleSignIn = async function() {
+  if (!roadAuth && !initRoadAuth()) return;
+  try {
+    const result = await signInWithPopup(roadAuth, new GoogleAuthProvider());
+    const tokenResult = await result.user.getIdTokenResult(true);
+    document.getElementById("roadOtpArea").style.display = "none";
+    roadOtpPending = false;
+    roadAuthStatus("Signed in with Google as " + (result.user.email || result.user.displayName) + ". Email OTP is not required for Google sign-in.");
+    const user = document.getElementById("roadAuthUser");
+    if (user) user.textContent = "Firebase account connected. Google sign-in completed.";
+  } catch (error) {
+    roadAuthStatus(error.message || "Google sign-in failed.", true);
+  }
+};
+window.roadVerifyOtp = async function() {
+  if (!roadAuth || !roadAuth.currentUser || !roadOtpPending) return roadAuthStatus("Sign in with email and password first.", true);
+  const code = document.getElementById("roadAuthOtp").value.trim();
+  if (!/^\d{6}$/.test(code)) return roadAuthStatus("Enter the six-digit code from your email.", true);
+  try {
+    const verifyEmailOtp = httpsCallable(roadFunctions, "verifyEmailOtp");
+    await verifyEmailOtp({ code });
+    await getIdToken(roadAuth.currentUser, true);
+    roadOtpPending = false;
+    document.getElementById("roadOtpArea").style.display = "none";
+    roadAuthStatus("Email OTP verified. Your Firebase account is verified for this session.");
+  } catch (error) { roadAuthStatus(error.message || "That code is invalid or expired.", true); }
+};
+window.roadResendOtp = async function() {
+  if (!roadAuth || !roadAuth.currentUser) return roadAuthStatus("Sign in first to request a code.", true);
+  try { await roadSendOtp(); } catch (error) { roadAuthStatus(error.message || "Could not send a new code.", true); }
+};
+window.roadFirebaseSignOut = async function() {
+  if (roadAuth) await signOut(roadAuth);
+  roadOtpPending = false;
+  roadAuthStatus("Signed out of Firebase.");
+};
+</script>
 </body></html>
