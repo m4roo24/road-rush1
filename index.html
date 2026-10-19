@@ -670,6 +670,10 @@ function updateOnlineHud(){
  $('onlinePlayersLabel').textContent=peers.length?peers.map(p=>(p.username||'Driver')+' '+Math.round(Number(p.speed)||0)+' km/h').join(' · '):'Connected — waiting for your opponent.';
 }
 window.connectOnlineRace=function(){
+ if(onlineSocket&&(onlineSocket.readyState===WebSocket.CONNECTING||onlineSocket.readyState===WebSocket.OPEN)){
+  raceStatus(onlineSocket.readyState===WebSocket.OPEN?'Already connected to room '+(onlineRoom||'')+'. Share the room code with your friend.':'Connecting to your race room…');
+  return;
+ }
  const urlInput=$('raceServerUrl'),nameInput=$('raceUsername'),roomInput=$('raceRoomCode');
  const raw=(urlInput.value||localStorage.getItem('road_rush_multiplayer_url')||'').trim();
  const username=(nameInput.value||save.driver||'Driver').trim().slice(0,18)||'Driver';
