@@ -87,7 +87,7 @@ server.addEventListener("message", event => {
   broadcast({
     type: "state",
     player: current
-  }, id);
+  }, server);
 
   broadcast({
     type: "players",
