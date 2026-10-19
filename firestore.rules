@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // OTP challenges are server-only; Admin SDK in Cloud Functions bypasses these rules.
+    match /emailOtpChallenges/{uid} {
+      allow read, write: if false;
+    }
+    // No client access to game/account documents by default. Add explicit rules
+    // for future collections, requiring request.auth.token.emailOtpVerified == true
+    // for any email/password protected data.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
