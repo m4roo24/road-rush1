@@ -1,0 +1,16 @@
+{
+  "name": "road-rush-multiplayer-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Socket.IO real-time room server for Road Rush multiplayer races",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
