@@ -1,7 +1,7 @@
 
 name = "road-rush-multiplayer"
 main = "src/index.js"
-compatibility_date = "2026-10-20"
+compatibility_date = "2026-10-19"
 
 [[durable_objects.bindings]]
 name = "RACE_ROOMS"
