@@ -40,7 +40,7 @@ export class RaceRoom {
     try { ws.send(JSON.stringify({ event, data })); } catch {}
   }
   broadcast(event, data) {
-    for (const ws of this.ctx.getWebSockets()) this.send(ws, event, data);
+    for (const ws of this.sockets) if (ws.readyState === 1) this.send(ws, event, data);
   }
   playerList() {
     return [...this.sockets].filter(ws => ws.readyState === 1).map(ws => {
@@ -70,7 +70,7 @@ export class RaceRoom {
     server.addEventListener("message", event => this.webSocketMessage(server, event.data));
     server.addEventListener("close", () => this.webSocketClose(server));
     server.addEventListener("error", () => this.webSocketError(server));
-    this.send(server, "race:joined", { roomCode, players: this.playerList() });
+    this.send(server, "race:joined", { roomCode, playerId: id, players: this.playerList() });
     this.broadcast("race:players", { roomCode, players: this.playerList() });
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -97,7 +97,7 @@ export class RaceRoom {
         this.started = true;
         this.broadcast("race:start", { roomCode: this.roomCode, players: all });
       }
-      for (const other of this.ctx.getWebSockets()) if (other !== ws) this.send(other, "race:state", { ...player, id });
+      for (const other of this.sockets) if (other !== ws && other.readyState === 1) this.send(other, "race:state", { ...player, id });
       if (this.started && player.lost && !player.running) {
         const winner = all.find(p => p.id !== id && p.running && !p.lost);
         if (winner) {
