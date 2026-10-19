@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "road-rush-multiplayer",
+  "name": "road-rush1",
   "main": "cloudflare-worker.js",
-  "compatibility_date": "2026-10-20",
+  "compatibility_date": "2026-10-19",
   "durable_objects": {
     "bindings": [
       { "name": "RACE_ROOMS", "class_name": "RaceRoom" }
