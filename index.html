@@ -424,7 +424,8 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
  .screenhead .backbtn{padding:8px 8px!important;font-size:14px!important}
 }
 
-</style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
+</style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"><script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
 <body>
 <main class="app" id="app">
 <section id="home" class="screen active">
@@ -657,60 +658,89 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&$('accountModal').classList.
 // A lightweight settings resume path from game pause.
 function restoreGameFromSettings(){if(current==='settings'&&game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');}}
 $('settings').querySelector('.backbtn').addEventListener('click',()=>{if(game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');current='game';resize()}else showScreen('home')});
-// Real-time multiplayer client: native WebSocket protocol used by the Cloudflare Worker.
-let onlineSocket=null,onlineSocketId='',onlineRoom='',onlinePlayers=new Map(),onlineLastSent=0;
-function onlineConnected(){return !!onlineSocket&&onlineSocket.readyState===WebSocket.OPEN}
+// Real-time 1v1 multiplayer race client (Socket.IO server).
+let onlineSocket=null,onlineSocketId='',onlineRoom='',onlinePlayers=new Map(),onlineLastSent=0,onlineResultHandled=false,onlineMatchStarted=false;
+function onlineConnected(){return !!onlineSocket&&onlineSocket.connected}
 function raceStatus(message){const el=$('raceStatus');if(el)el.textContent=message}
-function updateOnlineHud(){const hud=$('onlineRaceHud');if(!hud)return;hud.style.display=onlineConnected()?'block':'none';$('onlineRoomLabel').textContent=onlineRoom?' · ROOM '+onlineRoom:'';const peers=Array.from(onlinePlayers.values()).filter(p=>p&&p.id!==onlineSocketId);$('onlinePlayersLabel').textContent=peers.length?peers.map(p=>(p.username||'Driver')+' '+Math.round(Number(p.speed)||0)+' km/h').join(' · '):'Connected — waiting for other drivers.'}
+function updateOnlineHud(){
+ const hud=$('onlineRaceHud');if(!hud)return;
+ hud.style.display=onlineConnected()?'block':'none';
+ $('onlineRoomLabel').textContent=onlineRoom?' · ROOM '+onlineRoom:'';
+ const peers=Array.from(onlinePlayers.values()).filter(p=>p&&p.id!==onlineSocketId);
+ $('onlinePlayersLabel').textContent=peers.length?peers.map(p=>(p.username||'Driver')+' '+Math.round(Number(p.speed)||0)+' km/h').join(' · '):'Connected — waiting for your opponent.';
+}
 window.connectOnlineRace=function(){
  const urlInput=$('raceServerUrl'),nameInput=$('raceUsername'),roomInput=$('raceRoomCode');
- const raw=(urlInput.value||localStorage.getItem('road_rush_multiplayer_url')||'https://road-rush1.maroduhoki6.workers.dev').trim();
+ const raw=(urlInput.value||localStorage.getItem('road_rush_multiplayer_url')||'').trim();
  const username=(nameInput.value||save.driver||'Driver').trim().slice(0,18)||'Driver';
- let roomCode=(roomInput.value||'').trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,32);
- if(!roomCode)roomCode=Math.random().toString(36).slice(2,8).toUpperCase();
- let wsUrl;
- try{
-  const parsed=new URL(raw);
-  if(!['https:','http:','wss:','ws:'].includes(parsed.protocol))throw new Error('Use the Cloudflare Worker URL.');
-  parsed.protocol=(parsed.protocol==='https:'||parsed.protocol==='wss:')?'wss:':'ws:';
-  parsed.pathname='/';parsed.search='';parsed.hash='';
-  parsed.searchParams.set('room',roomCode);
-  wsUrl=parsed.toString();
- }catch(e){raceStatus('Enter a valid multiplayer server URL, such as https://road-rush1.maroduhoki6.workers.dev');return}
- const baseUrl=raw.replace(/^https:/i,'https:').replace(/^http:/i,'http:').replace(/^wss:/i,'https:').replace(/^ws:/i,'http:').replace(/\/$/,'');
- localStorage.setItem('road_rush_multiplayer_url',baseUrl);
+ const enteredCode=(roomInput.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+ const createRoom=!enteredCode;
+ const roomCode=enteredCode||Math.random().toString(36).slice(2,8).toUpperCase();
+ if(!raw){raceStatus('Enter your multiplayer server URL. Deploy multiplayer-server on Render and paste its URL here.');return}
+ let serverUrl;
+ try{const u=new URL(raw);if(!['https:','http:'].includes(u.protocol))throw new Error();serverUrl=u.origin}
+ catch{raceStatus('Enter a valid server URL, for example https://your-road-rush-server.onrender.com');return}
+ if(typeof window.io!=='function'){raceStatus('Multiplayer library did not load. Refresh the page and try again.');return}
+ localStorage.setItem('road_rush_multiplayer_url',serverUrl);
  nameInput.value=username;roomInput.value=roomCode;
- raceStatus('Connecting to multiplayer server…');
- if(onlineSocket){try{onlineSocket.close()}catch{}onlineSocket=null}
- onlinePlayers.clear();onlineSocketId='';onlineRoom=roomCode;updateOnlineHud();
- try{onlineSocket=new WebSocket(wsUrl)}catch(e){raceStatus('Could not start the connection. Check the server URL.');return}
- onlineSocket.addEventListener('open',()=>{raceStatus('Connected — joining room '+roomCode+'…');try{onlineSocket.send(JSON.stringify({type:'join',username}))}catch{}});
- onlineSocket.addEventListener('message',event=>{
-  let data;try{data=JSON.parse(event.data)}catch{return}
-  if(data.type==='welcome'){
-   onlineSocketId=data.id||'';
-   onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-   if(onlineSocketId)onlinePlayers.set(onlineSocketId,{id:onlineSocketId,username,lane:1,km:0,speed:0,running:false,color:currentVehicle()?.color||'#42d9ff'});
-   raceStatus('Connected to room '+roomCode+'. Share this code with your friend.');
-   updateOnlineHud();showScreen('home');startRun();$('onlineRaceHud').style.display='block';
-  }else if(data.type==='players'){
-   onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));updateOnlineHud();
-  }else if(data.type==='state'&&data.player&&data.player.id){
-   onlinePlayers.set(data.player.id,data.player);updateOnlineHud();
+ raceStatus('Connecting to race server…');
+ if(onlineSocket){try{onlineSocket.disconnect()}catch{}onlineSocket=null}
+ onlinePlayers.clear();onlineSocketId='';onlineRoom=roomCode;onlineResultHandled=false;onlineMatchStarted=false;updateOnlineHud();
+ onlineSocket=window.io(serverUrl,{transports:['websocket','polling'],timeout:12000,reconnection:false});
+ onlineSocket.on('connect',()=>{
+  raceStatus('Connected — joining '+roomCode+'…');
+  onlineSocket.emit('race:join',{roomCode,username,wallet:Math.max(0,Math.floor(Number(save.cash)||0)),create:createRoom});
+ });
+ onlineSocket.on('race:joined',data=>{
+  onlineSocketId=onlineSocket.id;onlineRoom=data.roomCode||roomCode;
+  onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
+  raceStatus('Room '+onlineRoom+' joined. Waiting for both drivers to be ready…');
+  updateOnlineHud();showScreen('home');startRun();$('onlineRaceHud').style.display='block';
+ });
+ onlineSocket.on('race:players',data=>{
+  onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));updateOnlineHud();
+ });
+ onlineSocket.on('race:state',player=>{if(player&&player.id){onlinePlayers.set(player.id,player);updateOnlineHud()}});
+ onlineSocket.on('race:start',data=>{
+  onlineMatchStarted=true;
+  if(data&&Array.isArray(data.players))onlinePlayers=new Map(data.players.filter(p=>p&&p.id).map(p=>[p.id,p]));
+  raceStatus('RACE STARTED! Crash first and your opponent takes all your coins.');
+  updateOnlineHud();
+ });
+ onlineSocket.on('race:result',result=>{
+  if(onlineResultHandled)return;onlineResultHandled=true;
+  const amount=Math.max(0,Math.floor(Number(result&&result.amount)||0));
+  if(result&&result.reason==='draw'){
+   raceStatus('DRAW — no coins transferred.');
+   if(typeof showInfo==='function')showInfo('RACE DRAW','🤝','Both drivers stopped. No coins were transferred.');
+   return;
+  }
+  if(result&&result.winnerId===onlineSocketId){
+   save.cash=Math.max(0,Math.floor(Number(save.cash)||0))+amount;
+   persist();updateHome();raceStatus('YOU WIN! +'+money(amount)+' transferred from your opponent.');
+   if(typeof showInfo==='function')showInfo('RACE WON','🏆','You won the head-to-head race and received '+money(amount)+' coins from your opponent.');
+  }else{
+   save.cash=0;persist();updateHome();raceStatus('YOU LOST — all your coins were transferred to the winner.');
+   if(typeof showInfo==='function')showInfo('RACE LOST','🏁','Your opponent won. Your in-game coin balance is now 0.');
   }
  });
- onlineSocket.addEventListener('close',()=>{onlinePlayers.clear();onlineSocketId='';updateOnlineHud();raceStatus('Disconnected from multiplayer server. Solo play still works.')});
- onlineSocket.addEventListener('error',()=>raceStatus('Could not reach the multiplayer server. Check that the Cloudflare Worker is deployed and its URL is correct.'));
+ onlineSocket.on('race:error',data=>raceStatus((data&&data.message)||'The race server returned an error.'));
+ onlineSocket.on('connect_error',()=>raceStatus('Could not reach this server. Use the URL of your deployed multiplayer-server service.'));
+ onlineSocket.on('disconnect',()=>{onlinePlayers.clear();onlineSocketId='';updateOnlineHud();raceStatus('Disconnected from multiplayer server. Solo play still works.')});
 };
 function gameviewActive(){return $('gameview')?.classList.contains('active')}
-function sendOnlineState(){if(!onlineConnected()||!onlineRoom||!gameviewActive())return;const now=performance.now();if(now-onlineLastSent<100)return;onlineLastSent=now;onlineSocket.send(JSON.stringify({type:'update',lane:game.lane,km:Math.max(0,Math.min(100000,game.km)),speed:Math.max(0,Math.min(500,game.speed)),running:!!game.running,color:currentVehicle()?.color||'#42d9ff'}))}
+function sendOnlineState(){
+ if(!onlineConnected()||!onlineRoom||!gameviewActive())return;
+ const now=performance.now();if(now-onlineLastSent<100)return;onlineLastSent=now;
+ onlineSocket.emit('race:update',{lane:game.lane,km:Math.max(0,Math.min(100000,game.km)),speed:Math.max(0,Math.min(500,game.speed)),running:!!game.running,lost:!!game.dead,wallet:Math.max(0,Math.floor(Number(save.cash)||0)),color:currentVehicle()?.color||'#42d9ff'});
+}
 setInterval(()=>{if(onlineConnected()&&onlineRoom&&gameviewActive())sendOnlineState()},100);
 const previousStartRun=startRun;startRun=function(){previousStartRun();if(onlineConnected()&&onlineRoom){$('onlineRaceHud').style.display='block';updateOnlineHud()}};window.startRun=startRun;
-const previousQuitGame=quitGame;quitGame=function(){previousQuitGame();if(onlineConnected()){try{onlineSocket.send(JSON.stringify({type:'leave'}))}catch{}onlineSocket.close()}onlineRoom='';onlinePlayers.clear();updateOnlineHud()};window.quitGame=quitGame;
+const previousQuitGame=quitGame;quitGame=function(){previousQuitGame();if(onlineSocket){try{onlineSocket.emit('race:leave');onlineSocket.disconnect()}catch{}onlineSocket=null}onlineRoom='';onlinePlayers.clear();onlineMatchStarted=false;updateOnlineHud()};window.quitGame=quitGame;
 
 window.copyRaceRoom=async function(){
  const room=String($('raceRoomCode')?.value||onlineRoom||'').trim().toUpperCase();
- if(!room){raceStatus('Create or join a room first so you have a room code to share.');return}
+ if(!room){raceStatus('Create a room first so you have a code to share.');return}
  try{await navigator.clipboard.writeText(room);raceStatus('Room code '+room+' copied. Send it to your friend!')}
  catch{const input=$('raceRoomCode');if(input){input.focus();input.select();raceStatus('Select and copy this room code: '+room)}}
 };
@@ -718,12 +748,12 @@ window.shareRaceInvite=async function(){
  const room=String($('raceRoomCode')?.value||onlineRoom||'').trim().toUpperCase();
  if(!room){raceStatus('Create a room first, then invite your friend with its code.');return}
  const url=new URL(location.href);url.search='';url.searchParams.set('room',room);url.hash='';
- const payload={title:'Road Rush — Race Invite',text:'Join my Road Rush room: '+room, url:url.toString()};
+ const payload={title:'Road Rush — Race Invite',text:'Join my Road Rush race: '+room, url:url.toString()};
  try{if(navigator.share){await navigator.share(payload);raceStatus('Race invite ready to send. Room: '+room)}else{await navigator.clipboard.writeText(payload.text+'\n'+payload.url);raceStatus('Invite link copied. Send it to your friend!')}}
  catch(e){if(e&&e.name==='AbortError')return;try{await navigator.clipboard.writeText(payload.text+'\n'+payload.url);raceStatus('Invite link copied. Send it to your friend!')}catch{raceStatus('Room code: '+room+' · Invite link: '+payload.url)}}
 };
 
-updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJobs();renderAchievements();updateAccountUi();if($('raceServerUrl'))$('raceServerUrl').value=localStorage.getItem('road_rush_multiplayer_url')||'https://road-rush1.maroduhoki6.workers.dev';if($('raceUsername'))$('raceUsername').value=save.driver||'Driver';const inviteRoom=new URLSearchParams(location.search).get('room');if(inviteRoom&&$('raceRoomCode'))$('raceRoomCode').value=inviteRoom.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,8);$('accountModal').addEventListener('click',e=>{if(e.target===$('accountModal'))closeAccount()});$('accountPassword').addEventListener('keydown',e=>{if(e.key==='Enter')accountAction(cloudToken?'login':'login')});$('accountUsername').addEventListener('keydown',e=>{if(e.key==='Enter')$('accountPassword').focus()});if(settings.largeText)document.body.style.fontSize='1.08em';drawWorld(0);if(cloudToken)loadCloudSave(true);
+updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJobs();renderAchievements();updateAccountUi();if($('raceServerUrl'))$('raceServerUrl').value=localStorage.getItem('road_rush_multiplayer_url')||'https://your-road-rush-server.onrender.com';if($('raceUsername'))$('raceUsername').value=save.driver||'Driver';const inviteRoom=new URLSearchParams(location.search).get('room');if(inviteRoom&&$('raceRoomCode'))$('raceRoomCode').value=inviteRoom.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,8);$('accountModal').addEventListener('click',e=>{if(e.target===$('accountModal'))closeAccount()});$('accountPassword').addEventListener('keydown',e=>{if(e.key==='Enter')accountAction(cloudToken?'login':'login')});$('accountUsername').addEventListener('keydown',e=>{if(e.key==='Enter')$('accountPassword').focus()});if(settings.largeText)document.body.style.fontSize='1.08em';drawWorld(0);if(cloudToken)loadCloudSave(true);
 })();
 </script><script>
 (()=>{let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null});window.installGame=async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch(e){}deferredInstallPrompt=null;return}if(window.showInfo)window.showInfo('Install app','📲','For the install option, open this game from its HTTPS website in Chrome, then choose Install app or Add to Home screen from the browser menu.')};window.addEventListener('load',()=>{})})();
