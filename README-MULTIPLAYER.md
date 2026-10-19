@@ -1,30 +1,29 @@
-# Road Rush: 1v1 multiplayer coin-pot races
+# Road Rush Cloudflare multiplayer
 
 ## Features
-- Create a race room or join a friend's room with a code.
-- The race waits until both drivers are connected before starting.
-- Live driver lane, distance, speed, and running-state synchronization.
-- Head-to-head match: when one driver crashes, the other driver wins.
-- The winner receives the loser's current in-game coin balance; the loser's balance becomes zero.
-- Draws transfer no coins. Disconnecting after the match starts counts as a forfeit.
-- This is an in-game currency mechanic, not real-money betting.
+- Create a room or join a friend's room with a code.
+- Cloudflare Worker + Durable Objects provide live WebSocket rooms.
+- The race starts when both drivers are connected and running.
+- Winner earns a fixed 100 in-game coin bonus; the losing driver keeps their balance.
+- A draw awards no bonus.
+- This is a casual multiplayer prototype, not cheat-proof competitive infrastructure.
 
-## Deploy frontend to Vercel
-Deploy the repository root as a static project. Use Framework Preset Other, no build command, and . as the output directory if asked.
+## Deploy
+The static frontend remains on Vercel. Deploy the multiplayer Worker from the repository root with Wrangler:
 
-## Deploy multiplayer server
-Deploy the multiplayer-server/ directory as a separate Node web service:
-- Build command: npm install
-- Start command: npm start
-- Environment variable: FRONTEND_ORIGIN=https://YOUR-VERCEL-PROJECT.vercel.app
+```sh
+npm install --save-dev wrangler
+npx wrangler login
+npx wrangler deploy
+```
 
-After deployment, check https://YOUR-SERVICE.onrender.com/health. It should return JSON with ok: true.
+The `wrangler.jsonc` file defines the `RACE_ROOMS` Durable Object binding and initial migration. After deployment, open `https://YOUR-WORKER-URL/health` and confirm `ok: true`.
 
 ## Play
-1. Open Race friends and paste the Render service URL into Multiplayer Server URL.
-2. Leave room code empty and tap Create / Join Race.
-3. Share the room code.
-4. Your opponent uses the same server URL and enters that room code.
+1. Open Race friends on the game website.
+2. Enter the deployed Cloudflare Worker URL.
+3. Leave the room code empty and create a room.
+4. Share the room code with a friend; they use the same Worker URL and enter that code.
 
-## Important limitations
-The server keeps rooms in memory, so rooms reset when the service restarts. The starting coin balance is reported by each browser, so this is suitable for casual play rather than cheat-proof competitive play. The server must be deployed separately; the static Vercel site cannot host persistent Socket.IO connections itself.
+## Notes
+The Worker must be deployed separately from the Vercel frontend. This prototype uses a fixed non-wagered reward; the losing player's coins are not taken.
