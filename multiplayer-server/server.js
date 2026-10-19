@@ -117,7 +117,7 @@ io.on('connection', socket => {
       io.to(code).emit('race:start', { roomCode: code, players: players.map(publicPlayer) });
     }
     socket.to(code).emit('race:state', publicPlayer(socket));
-    if (room.match.started && p.lost && !wasRunning === false) {
+    if (room.match.started && p.lost && !p.running) {
       const winner = players.find(s => s.id !== socket.id && s.data.player.running && !s.data.player.lost);
       if (winner) settleMatch(code, room, winner, p.wallet, 'crash');
     }
