@@ -579,7 +579,100 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
   }
 }
 
-</style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
+</style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"><style id="road-rush-nextgen-ui">
+/* Road Rush visual refresh: clean racing dashboard + mobile-first cockpit */
+:root{--bg:#080d16;--panel:#111b2a;--ink:#050912;--white:#f4f8fc;--muted:#91a2b7;--yellow:#c8ff43;--green:#57f0b4;--blue:#51b9ff;--pink:#ff658b;--orange:#ff9d52;--purple:#a78bfa;--teal:#42e5d1}
+html,body{background:#080d16;color:var(--white);font-family:Inter,'DM Sans',system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% -20%,#1a3550 0,transparent 48%),linear-gradient(145deg,#080d16,#0b1320 55%,#080d16)}
+.app{max-width:760px;padding:clamp(12px,3vw,24px);background:linear-gradient(180deg,#0e1724f5,#0a111cf7);border:1px solid #26384a;border-radius:0;box-shadow:0 24px 80px #0008}
+.brandrow{margin:4px 0 24px;padding:8px 2px 14px;border-bottom:1px solid #26384a}
+.smallbrand img.brand-logo{filter:drop-shadow(0 0 18px #c8ff4355)}
+.save{color:#c8ff43;text-decoration:none;border:1px solid #354d39;background:#15251e;border-radius:999px;padding:10px 13px;font-weight:800;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-title{font-family:'Barlow Condensed','DM Sans',sans-serif;font-style:italic;font-size:clamp(54px,12vw,94px);letter-spacing:-2px;text-shadow:0 5px 0 #03070d;margin:16px 0 4px;gap:10px}
+.hero-title .roadword{color:#f7fbff}
+.hero-title .runword{color:#08110a;background:var(--yellow);border:0;border-radius:8px;padding:4px 14px 7px;box-shadow:0 5px 0 #718c25;transform:skewX(-7deg)}
+.subtitle{font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:3.2px;color:#8fa3b8;margin:10px 0 24px}
+.vehicle-card{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 0,#233c4e,#101a28 70%);border:1px solid #34495a;border-radius:24px;padding:clamp(14px,3vw,24px);box-shadow:0 14px 35px #0005;margin-bottom:16px}
+.vehicle-card:before{content:'GARAGE / CURRENT VEHICLE';display:block;font:800 10px/1.2 Inter,system-ui,sans-serif;letter-spacing:2.4px;color:#88a0b6;margin-bottom:4px}
+.truckstage{height:170px}
+.truckstage:after{content:'';position:absolute;bottom:10px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,#c8ff4388,transparent)}
+.truckstage svg{filter:drop-shadow(0 12px 12px #0008)}
+.veh-name{font-family:'Barlow Condensed',sans-serif;font-style:italic;font-size:clamp(34px,7vw,48px);letter-spacing:.4px}
+.veh-meta,.pills{color:#9db0c4}
+.pill{background:#152434;border:1px solid #30475a;border-radius:8px;color:#c6d6e4}
+.cash{color:var(--yellow);font-family:'Barlow Condensed',sans-serif}
+.navgrid{gap:10px!important}
+.navbtn,.tab,.smallbtn{border:1px solid #3a4d60;border-radius:14px;box-shadow:0 4px 0 #03070d,inset 0 1px #ffffff12;min-height:64px;background:linear-gradient(145deg,#1c2a3a,#111b29);font-family:'Barlow Condensed','DM Sans',sans-serif;font-size:clamp(18px,4.6vw,25px);letter-spacing:.4px;transition:transform .12s,border-color .12s,filter .12s}
+.navbtn:hover,.tab:hover,.smallbtn:hover{border-color:#c8ff43;filter:brightness(1.08)}
+.bigbtn,.action{border:1px solid #52687c;border-radius:13px;box-shadow:0 4px 0 #03070d,inset 0 1px #ffffff25;font-family:'Barlow Condensed','DM Sans',sans-serif;letter-spacing:.7px;font-weight:900;transition:transform .12s,filter .12s}
+.bigbtn{min-height:66px;font-size:clamp(22px,5vw,30px)}
+.yellow{background:linear-gradient(135deg,#d9ff6d,#b4ed2e);color:#101708;border-color:#e5ff9d}
+.blue{background:linear-gradient(135deg,#348fe4,#2560b8);color:white}
+.green{background:linear-gradient(135deg,#46e4a1,#19a873);color:#03170f}
+.pink{background:linear-gradient(135deg,#ff7598,#d83d71)}
+.purple{background:linear-gradient(135deg,#b29aff,#7856dc)}
+.gift{background:linear-gradient(115deg,#b9f34c,#e0ff8a);color:#10180a}
+.challenge{background:linear-gradient(115deg,#633ee4,#aa75ff)}
+.banner{border:1px solid #ffffff22;border-radius:18px;box-shadow:0 8px 24px #0004,inset 0 1px #ffffff20;min-height:88px}
+.week,.vehicle-card,.account-panel{border-color:#314659}
+.week{background:#111d2b;border-radius:16px}
+.optionrow{border-bottom:1px solid #293b4d}
+.sectionlabel{font-family:'Barlow Condensed',sans-serif;font-size:27px;letter-spacing:1px;color:var(--yellow)}
+/* In-race cockpit */
+.gameview{background:#07101a}
+.gamehud{top:max(12px,env(safe-area-inset-top));left:12px;right:12px;gap:9px;align-items:flex-start}
+.hudmain{background:linear-gradient(145deg,#101e2beF,#08111deF);border:1px solid #7890a855;border-radius:17px;box-shadow:0 10px 28px #0007,inset 0 1px #ffffff12;padding:10px 13px}
+.hudmoney{font-family:'Barlow Condensed',sans-serif;font-size:clamp(27px,6vw,39px);font-style:italic;letter-spacing:.4px;color:#f8fbff}
+.hudsub{font:700 12px/1.4 Inter,system-ui,sans-serif;color:#a8bdcf}
+.fuel{height:8px;border:1px solid #30485a;background:#26394a}
+.fuel>i{border-radius:99px}
+.pausebtn{width:54px;height:56px;flex:0 0 54px;border:1px solid #8ba2b866;border-radius:16px;background:#0d1a29ed;box-shadow:0 8px 22px #0006;font:900 24px Inter,system-ui,sans-serif;color:#c8ff43}
+.magnet-hud{border-radius:8px!important;border-width:1px!important}
+.boss-hud{border:1px solid #ff8a6b66!important;border-radius:13px!important;box-shadow:0 8px 24px #0005!important;backdrop-filter:blur(12px)}
+.distancehint{font:800 11px Inter,system-ui,sans-serif;letter-spacing:1px;color:#b8fff0;text-shadow:0 2px 10px #000}
+.tutorial{font:800 clamp(13px,3vw,17px)/1.6 Inter,system-ui,sans-serif;text-shadow:0 2px 12px #000;background:#08121c99;border:1px solid #ffffff18;border-radius:14px;padding:12px 16px;max-width:540px;margin:auto;backdrop-filter:blur(6px)}
+.lanehint{font:800 clamp(13px,3.4vw,17px)/1.35 Inter,system-ui,sans-serif;background:#0c1926eF;border:1px solid #c8ff4388;border-radius:13px;box-shadow:0 10px 24px #0007;padding:12px 14px;color:#eaffcb}
+.drivebuttons{bottom:max(24px,env(safe-area-inset-bottom));left:16px;right:16px}
+.drivebuttons button{width:72px;height:66px;border:1px solid #d9f7ff66;border-radius:18px;background:#0b1927d9;box-shadow:0 8px 20px #0007;font-size:27px;backdrop-filter:blur(8px)}
+.gameoverlay{background:#020812c9;backdrop-filter:blur(12px);padding:16px}
+.overlaypanel{width:min(520px,100%);background:radial-gradient(ellipse at 50% 0,#1c3346,#0c1724 65%);border:1px solid #4a6579;border-radius:24px;box-shadow:0 24px 70px #000a;padding:clamp(18px,5vw,30px)}
+.overlaypanel h2{font-family:'Barlow Condensed',sans-serif;font-style:italic;letter-spacing:1px;font-size:clamp(44px,10vw,68px);text-shadow:0 4px #03070d}
+.overlaypanel p{color:#a9bbcb}
+.overlayactions{gap:10px}
+.overlayactions .action{min-height:56px;font-size:clamp(17px,4vw,22px)}
+.pinkwide{min-height:56px!important;font-size:20px}
+.hud-toggle-btn{position:absolute;z-index:6;top:88px;right:13px;padding:9px 12px;border:1px solid #8aa3b577;border-radius:10px;background:#0b1827df;color:#d9e7f4;font:900 10px Inter,system-ui,sans-serif;letter-spacing:1px;box-shadow:0 5px 15px #0005;backdrop-filter:blur(8px)}
+.hud-toggle-btn[aria-pressed="true"]{background:#c8ff43;color:#101708;border-color:#eaffb4}
+.gameview.clean-hud .hudmain,.gameview.clean-hud .boss-hud,.gameview.clean-hud #onlineRaceHud,.gameview.clean-hud .distancehint,.gameview.clean-hud .tutorial,.gameview.clean-hud .lanehint{opacity:0;pointer-events:none;transition:opacity .18s}
+.gameview.clean-hud .gamehud{pointer-events:none}
+.gameview.clean-hud .pausebtn{pointer-events:auto;opacity:.55}
+.gameview.clean-hud .drivebuttons{opacity:.45}
+.account-panel{background:linear-gradient(150deg,#17283a,#0b1420);border-radius:22px}
+input,textarea,select{background:#09131f!important;color:#f3f8ff!important;border:1px solid #385167!important;border-radius:10px!important}
+@media(max-width:600px){
+ .app{padding:12px 13px 24px;border-left:0;border-right:0}
+ .brandrow{margin-bottom:14px;padding-bottom:10px}
+ .hero-title{font-size:clamp(48px,13vw,72px);gap:7px}
+ .subtitle{font-size:11px;letter-spacing:2px;margin-bottom:16px}
+ .vehicle-card{border-radius:18px}
+ .truckstage{height:122px}
+ .navgrid{gap:8px!important}
+ .navbtn,.tab,.smallbtn{min-height:56px;border-radius:12px;padding:9px 8px;font-size:18px}
+ .banner{border-radius:14px}
+ .gamehud{top:max(8px,env(safe-area-inset-top));left:8px;right:8px;gap:7px}
+ .hudmain{padding:8px 10px;border-radius:14px}
+ .hudmoney{font-size:clamp(25px,7vw,34px)}
+ .pausebtn{width:48px;height:50px;flex-basis:48px;border-radius:13px;font-size:22px}
+ .hud-toggle-btn{top:76px;right:9px;padding:8px 10px;font-size:9px}
+ .boss-hud{max-width:calc(100vw - 20px)}
+ .drivebuttons{bottom:max(20px,env(safe-area-inset-bottom));left:13px;right:13px}
+ .drivebuttons button{width:64px;height:60px}
+ .overlaypanel{border-radius:20px;padding:20px 16px}
+ .overlayactions .action{min-height:54px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
 <body>
 <main class="app" id="app">
 <section id="home" class="screen active">
@@ -621,7 +714,7 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
 <section id="police" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Police</h1><div class="balance">🚓</div></div><div class="feature-card police-card"><div class="police-hero">🚔</div><h2>Interceptor Pursuit Unit</h2><p>Unlock the police cruiser in the Garage and drive with the highest top speed in the current fleet.</p><div class="pill-row"><span class="pill">212 km/h top speed</span><span class="pill green">Rapid acceleration</span></div><button class="bigbtn yellow" style="width:100%;margin-top:18px" onclick="showScreen('garage')">OPEN GARAGE</button></div></section>
 <section id="friends" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Race friends</h1><div class="balance">🏁</div></div><div class="feature-card"><div class="police-hero">🏎️</div><h2>Live online race</h2><p>Join the same room as a friend to see each other's cars move live on the highway. Leave the room code empty to create a new room.</p><label for="raceServerUrl" style="display:block;margin:12px 0 6px;color:#bfc0d7">MULTIPLAYER SERVER URL</label><input id="raceServerUrl" type="url" value="https://road-rush1.maroduhoki6.workers.dev" placeholder="https://road-rush1.maroduhoki6.workers.dev" autocomplete="url" style="width:100%;padding:14px;border:3px solid #080d20;border-radius:15px;background:#10162b;color:white;font:700 15px system-ui"><label for="raceUsername" style="display:block;margin:12px 0 6px;color:#bfc0d7">DRIVER NAME</label><input id="raceUsername" maxlength="18" placeholder="Driver name" style="width:100%;padding:14px;border:3px solid #080d20;border-radius:15px;background:#10162b;color:white;font:700 15px system-ui"><label for="raceRoomCode" style="display:block;margin:12px 0 6px;color:#bfc0d7">ROOM CODE (OPTIONAL)</label><input id="raceRoomCode" maxlength="8" autocapitalize="characters" placeholder="e.g. 4F8K2Q" style="width:100%;padding:14px;border:3px solid #080d20;border-radius:15px;background:#10162b;color:white;font:700 18px system-ui;text-transform:uppercase"><button class="bigbtn green" style="width:100%;margin-top:14px" onclick="connectOnlineRace()">⚡ CREATE / JOIN RACE</button><p class="setting-note" id="raceStatus" aria-live="polite">Not connected. Deploy the multiplayer server first.</p><div class="race-invite-actions"><button class="action blue" onclick="copyRaceRoom()">▣ COPY ROOM CODE</button><button class="action navy" onclick="shareRaceInvite()">↗ INVITE A FRIEND</button></div><button class="action navy" style="width:100%;margin-top:10px" onclick="shareChallenge()">↗ SHARE WEBSITE</button><button class="action navy" style="width:100%;margin-top:10px" onclick="loadLeaderboard();showScreen('leaderboard')">VIEW ONLINE LEADERBOARD</button><p class="setting-note" id="shareStatus" aria-live="polite"></p></div></section>
 </main>
-<div id="gameview" class="gameview"><div id="onlineRaceHud" style="display:none;position:absolute;z-index:3;top:116px;left:12px;max-width:min(310px,75vw);padding:8px 12px;border:2px solid #41d9a0;border-radius:14px;background:#10172be8;color:#eafff7;font:800 12px system-ui;pointer-events:none">🟢 LIVE RACE <span id="onlineRoomLabel"></span><div id="onlinePlayersLabel" style="margin-top:4px;color:#bfc7db;font-weight:700">Waiting for drivers…</div></div><canvas id="roadCanvas" class="gamecanvas"></canvas><div class="boss-controls"><button id="buyAmmoBtn" onclick="buyBossAmmo()">🟡 BUY 50 AMMO · $500</button><button id="fireBossBtn" onclick="fireBossWeapon()">🔫 FIRE <span id="ammoCount">0</span></button></div><div class="boss-hud" id="bossHud"><div id="bossLabel">BOSS 1/10 · NOOB</div><div class="boss-health"><i id="bossHealthFill"></i></div><div id="bossHint" style="margin-top:5px">Boss appears every 5 minutes</div></div><div class="gamehud"><div class="hudmain"><div class="hudmoney"><span class="hudcash-icon" aria-hidden="true">💵</span><span id="runCash">$0</span></div><div class="hudsub"><span id="runKm">0.0</span> km · <span id="runSpeed">31</span> km/h</div><div class="fuelrow"><span class="fuelicon">♦</span><div class="fuel"><i id="fuelFill"></i></div></div><div class="magnet-hud" id="magnetHud">🧲 MAGNET <b id="magnetTimeText">15.0s</b></div><div class="magnet-hud boost-hud" id="boostHud" style="border-color:#42d9ff;background:linear-gradient(90deg,#124e83dd,#171c33ee);color:#c9f4ff"><span>⚡ NITRO BOOST</span><b id="boostTimeText">5.0s</b></div></div><button class="pausebtn" id="pauseBtn">Ⅱ</button></div><div class="distancehint" id="fpsText">56 fps</div><div class="combo-burst" id="comboBurst"></div><div class="tutorial" id="tutorial">Grab crates (gold x3, diamonds x6!), dodge the rest<br>This map pays x1 cash</div><div class="lanehint" id="lanehint">Tap the left or right side to change lanes</div><div class="drivebuttons" id="drivebuttons"><button id="driveLeft" aria-label="Steer left">◀</button><button id="driveRight" aria-label="Steer right">▶</button></div>
+<div id="gameview" class="gameview"><div id="onlineRaceHud" style="display:none;position:absolute;z-index:3;top:116px;left:12px;max-width:min(310px,75vw);padding:8px 12px;border:2px solid #41d9a0;border-radius:14px;background:#10172be8;color:#eafff7;font:800 12px system-ui;pointer-events:none">🟢 LIVE RACE <span id="onlineRoomLabel"></span><div id="onlinePlayersLabel" style="margin-top:4px;color:#bfc7db;font-weight:700">Waiting for drivers…</div></div><canvas id="roadCanvas" class="gamecanvas"></canvas><div class="boss-controls"><button id="buyAmmoBtn" onclick="buyBossAmmo()">🟡 BUY 50 AMMO · $500</button><button id="fireBossBtn" onclick="fireBossWeapon()">🔫 FIRE <span id="ammoCount">0</span></button></div><div class="boss-hud" id="bossHud"><div id="bossLabel">BOSS 1/10 · NOOB</div><div class="boss-health"><i id="bossHealthFill"></i></div><div id="bossHint" style="margin-top:5px">Boss appears every 5 minutes</div></div><div class="gamehud"><div class="hudmain"><div class="hudmoney"><span class="hudcash-icon" aria-hidden="true">💵</span><span id="runCash">$0</span></div><div class="hudsub"><span id="runKm">0.0</span> km · <span id="runSpeed">31</span> km/h</div><div class="fuelrow"><span class="fuelicon">♦</span><div class="fuel"><i id="fuelFill"></i></div></div><div class="magnet-hud" id="magnetHud">🧲 MAGNET <b id="magnetTimeText">15.0s</b></div><div class="magnet-hud boost-hud" id="boostHud" style="border-color:#42d9ff;background:linear-gradient(90deg,#124e83dd,#171c33ee);color:#c9f4ff"><span>⚡ NITRO BOOST</span><b id="boostTimeText">5.0s</b></div></div><button class="pausebtn" id="pauseBtn">Ⅱ</button></div><button id="hudToggleBtn" class="hud-toggle-btn" type="button" aria-pressed="false" title="Toggle clean HUD">◉ HUD</button><div class="distancehint" id="fpsText">56 fps</div><div class="combo-burst" id="comboBurst"></div><div class="tutorial" id="tutorial">Grab crates (gold x3, diamonds x6!), dodge the rest<br>This map pays x1 cash</div><div class="lanehint" id="lanehint">Tap the left or right side to change lanes</div><div class="drivebuttons" id="drivebuttons"><button id="driveLeft" aria-label="Steer left">◀</button><button id="driveRight" aria-label="Steer right">▶</button></div>
  <div class="gameoverlay hidden" id="pauseOverlay"><div class="overlaypanel"><h2>Paused</h2><p><b id="pauseRunCash">$0 this run</b> · <span id="pauseKm">0.0 km</span></p><p>Restart or quit and this cash is kept.</p><button class="bigbtn yellow" id="resumeBtn">▷ RESUME</button><div class="overlayactions"><button class="action blue" id="restartBtn">⟳ Restart</button><button class="action gray" id="pauseSettingsBtn">⚙ Settings</button></div><button class="action pink pinkwide" id="quitBtn">⌂ Quit to menu</button></div></div>
  <div class="gameoverlay hidden" id="crashOverlay"><div class="overlaypanel"><h2>Crash!</h2><p>You earned <b id="crashCash">$0</b> this run · <span id="crashKm">0.0 km</span></p><p>Watch the gaps and try again!</p><button class="bigbtn yellow" id="againBtn">▷ TRY AGAIN</button><div class="overlayactions"><button class="action blue" id="crashRestartBtn">⟳ Restart</button><button class="action pink" id="crashQuitBtn">⌂ Menu</button></div></div></div>
 </div>
@@ -1454,4 +1547,27 @@ window.roadFirebaseSignOut = async function() {
 // Initialize at page load so Firebase can restore the persisted Google session.
 initRoadAuth();
 </script>
+<script id="road-rush-ui-features">
+(()=> {
+ const view=document.getElementById('gameview'),btn=document.getElementById('hudToggleBtn');
+ if(!view||!btn)return;
+ function setCleanHud(on){
+  view.classList.toggle('clean-hud',!!on);
+  btn.setAttribute('aria-pressed',String(!!on));
+  btn.textContent=on?'◉ HUD ON':'◉ HUD';
+  btn.title=on?'Show driving HUD':'Hide driving HUD for a cleaner view';
+ }
+ btn.addEventListener('click',()=>setCleanHud(!view.classList.contains('clean-hud')));
+ document.addEventListener('keydown',e=>{
+  if((e.key==='h'||e.key==='H')&&view.classList.contains('active')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')){
+   setCleanHud(!view.classList.contains('clean-hud'));
+  }
+ });
+ const start=window.startRun;
+ if(typeof start==='function')window.startRun=function(...args){setCleanHud(false);return start.apply(this,args)};
+ const quit=window.quitGame;
+ if(typeof quit==='function')window.quitGame=function(...args){setCleanHud(false);return quit.apply(this,args)};
+})();
+</script>
+<script>window.__ROAD_RUSH_BUILD__="2026-10-20-nextgen-ui-hud-toggle";</script>
 </body></html>
