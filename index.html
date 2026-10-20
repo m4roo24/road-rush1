@@ -970,12 +970,45 @@ function currentMultiplier(){const m=maps[save.selectedMap]||maps[0],match=m.det
  window.buyBossAmmo=function(){try{if(!game.running||game.paused){showCombo('BUY AMMO DURING A RUN');return}if(game.cash<500){showCombo('NEED $500 RUN CASH FOR AMMO');return}game.cash-=500;game.weaponAmmo=(Number(game.weaponAmmo)||0)+50;save.weaponAmmo=game.weaponAmmo;updateBossHud();sound(760,.1);showCombo('-$500 RUN CASH · +50 AMMO')}catch(err){console.error('Ammo purchase failed:',err);showCombo('AMMO PURCHASE FAILED')}};
  window.fireBossWeapon=function(){if(!game.running||game.paused)return;if(!game.boss){showCombo('NO BOSS IN RANGE');return}if(game.weaponAmmo<=0){showCombo('OUT OF AMMO · BUY 50 FOR $500');return}game.weaponAmmo--;save.weaponAmmo=game.weaponAmmo;const road=roadGeom(),px=road.left+road.lanew*(game.visualLane+.5);game.bossBullets.push({x:px,y:H*.79-34});updateBossHud();sound(980,.05)};
 
-function roadProp(x,y,seed,side){const mapIndex=save.selectedMap;ctx.save();ctx.translate(x,y);const type=(Math.floor(seed/90)+mapIndex)%5;
- if(type===0||type===1){const size=type===0?14:10;ctx.fillStyle='#514b3d';ctx.fillRect(-2,2,4,size*.9);ctx.fillStyle=type===0?'#5d8656':'#78945e';ctx.beginPath();ctx.arc(0,0,size,0,Math.PI*2);ctx.fill();ctx.fillStyle='#9fb67a';ctx.beginPath();ctx.arc(-size*.27,-size*.26,size*.42,0,Math.PI*2);ctx.fill()}
- else if(type===2){ctx.fillStyle='#c8b292';ctx.fillRect(-13,-8,26,18);ctx.fillStyle=mapIndex===15?'#554c78':'#a7583e';ctx.beginPath();ctx.moveTo(-16,-8);ctx.lineTo(0,-19);ctx.lineTo(16,-8);ctx.closePath();ctx.fill();ctx.fillStyle='#273349';ctx.fillRect(-4,-1,7,11);ctx.fillStyle='#b5dce3';ctx.fillRect(6,-3,5,5)}
- else if(type===3){ctx.fillStyle='#8a9086';ctx.fillRect(-12,-10,24,20);ctx.fillStyle='#d9d1bc';ctx.fillRect(-9,-7,18,14);ctx.fillStyle='#414955';ctx.fillRect(-6,-4,12,8)}
- else{ctx.fillStyle='#c9b78d';ctx.fillRect(-10,-3,20,9);ctx.fillStyle='#687e58';ctx.beginPath();ctx.arc(-5,-6,7,0,Math.PI*2);ctx.arc(5,-6,7,0,Math.PI*2);ctx.fill()}
- ctx.restore()}
+function roadProp(x,y,seed,side){
+ const mapIndex=save.selectedMap,map=maps[mapIndex]||maps[0],type=(Math.floor(seed/90)+mapIndex)%5;
+ const snow=[17,18,19].includes(mapIndex),city=[7,8,10,15,16].includes(mapIndex),desert=[3,4,10].includes(mapIndex),coast=[2,5,6,8,9,13,14].includes(mapIndex);
+ ctx.save();ctx.translate(x,y);
+ if(city){
+  const h=18+((Math.floor(seed/17)+mapIndex*7)%28),w=16+((Math.floor(seed/31)+mapIndex)%12);
+  ctx.fillStyle=mapIndex===10?'#d6b681':mapIndex===15?'#333d61':mapIndex===16?'#687a8b':mapIndex===7?'#b76c72':'#4b7184';
+  ctx.fillRect(-w/2,-h+8,w,h);
+  ctx.fillStyle=mapIndex===10?'#fff0b1':'#a9e6f0';
+  for(let wy=-h+12;wy<4;wy+=8)for(let wx=-w/2+4;wx<w/2-2;wx+=7){if(((Math.floor(wx+seed)+Math.floor(wy)+mapIndex)%3)!==0)ctx.fillRect(wx,wy,3,4)}
+  if(mapIndex===10){ctx.fillStyle='#eee2c6';ctx.fillRect(-2,-h-9,4,18);ctx.beginPath();ctx.moveTo(-5,-h-9);ctx.lineTo(0,-h-17);ctx.lineTo(5,-h-9);ctx.fill()}
+  if(mapIndex===16&&type===2){ctx.fillStyle='#d9e2e7';ctx.fillRect(-w/2-3,-h-3,w+6,5)}
+  if(mapIndex===7&&type===1){ctx.fillStyle='#ed9db2';ctx.beginPath();ctx.arc(0,-h+5,10,Math.PI,Math.PI*2);ctx.fill()}
+ }else if(snow){
+  const size=type===0?18:13;
+  ctx.fillStyle='#536777';ctx.fillRect(-2,0,4,size+8);
+  ctx.fillStyle=mapIndex===19?'#d7e5ed':'#dce9f1';
+  for(let k=0;k<3;k++){ctx.beginPath();ctx.moveTo(0,-size-k*7-8);ctx.lineTo(-size+k*3,-k*7);ctx.lineTo(size-k*3,-k*7);ctx.closePath();ctx.fill()}
+  ctx.fillStyle='#f8fdff';ctx.beginPath();ctx.ellipse(0,-size-8,7,3,0,0,Math.PI*2);ctx.fill();
+  if(type===2){ctx.fillStyle='#dce8ef';ctx.fillRect(-13,0,26,4);ctx.fillRect(-9,-6,18,6)}
+ }else if(desert){
+  ctx.fillStyle='#74513b';ctx.beginPath();ctx.moveTo(-19,12);ctx.lineTo(-12,-10);ctx.lineTo(-3,-1);ctx.lineTo(5,-22);ctx.lineTo(21,12);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#c9945e';ctx.beginPath();ctx.moveTo(-12,12);ctx.lineTo(-3,-1);ctx.lineTo(5,-22);ctx.lineTo(7,12);ctx.closePath();ctx.fill();
+  if(mapIndex===10){ctx.fillStyle='#d9c49a';ctx.fillRect(-13,-3,26,17);ctx.fillStyle='#f2e3bd';ctx.beginPath();ctx.moveTo(-17,-3);ctx.lineTo(0,-13);ctx.lineTo(17,-3);ctx.fill()}
+ }else if(coast&&type<3){
+  ctx.fillStyle='#526f65';ctx.beginPath();ctx.moveTo(-17,13);ctx.lineTo(-10,-8);ctx.lineTo(-2,-2);ctx.lineTo(7,-18);ctx.lineTo(19,13);ctx.closePath();ctx.fill();
+  ctx.fillStyle=mapIndex===9?'#e5ddd0':'#819a79';ctx.fillRect(-2,2,4,12);
+  if(mapIndex===9){ctx.fillStyle='#f8f5e9';ctx.fillRect(-13,-8,26,18);ctx.fillStyle='#3f93b4';ctx.fillRect(-9,-4,7,7);ctx.fillRect(2,-4,7,7);ctx.fillStyle='#6aa6cb';ctx.beginPath();ctx.moveTo(-16,-8);ctx.lineTo(0,-19);ctx.lineTo(16,-8);ctx.fill()}
+ }else if(type===0||type===1){
+  const size=type===0?14:10;ctx.fillStyle='#514b3d';ctx.fillRect(-2,2,4,size*.9);ctx.fillStyle=type===0?'#5d8656':'#78945e';ctx.beginPath();ctx.arc(0,0,size,0,Math.PI*2);ctx.fill();ctx.fillStyle='#9fb67a';ctx.beginPath();ctx.arc(-size*.27,-size*.26,size*.42,0,Math.PI*2);ctx.fill()
+ }else if(type===2){
+  ctx.fillStyle='#c8b292';ctx.fillRect(-13,-8,26,18);ctx.fillStyle=mapIndex===15?'#554c78':'#a7583e';ctx.beginPath();ctx.moveTo(-16,-8);ctx.lineTo(0,-19);ctx.lineTo(16,-8);ctx.closePath();ctx.fill();ctx.fillStyle='#273349';ctx.fillRect(-4,-1,7,11);ctx.fillStyle='#b5dce3';ctx.fillRect(6,-3,5,5)
+ }else if(type===3){
+  ctx.fillStyle='#8a9086';ctx.fillRect(-12,-10,24,20);ctx.fillStyle='#d9d1bc';ctx.fillRect(-9,-7,18,14);ctx.fillStyle='#414955';ctx.fillRect(-6,-4,12,8)
+ }else{
+  ctx.fillStyle='#c9b78d';ctx.fillRect(-10,-3,20,9);ctx.fillStyle='#687e58';ctx.beginPath();ctx.arc(-5,-6,7,0,Math.PI*2);ctx.arc(5,-6,7,0,Math.PI*2);ctx.fill()
+ }
+ ctx.restore()
+}
 function drawWorld(dt){
  ctx.clearRect(0,0,W,H);const {left,width,lanew,right}=roadGeom(),map=maps[save.selectedMap]||maps[0];
  // Ground texture moves opposite the car; roadside props are deterministic so they do not flicker.
