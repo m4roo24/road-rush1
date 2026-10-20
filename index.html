@@ -876,11 +876,57 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
  <div class="rr-settings-divider"></div>
  <div class="rr-settings-feature"><div class="rr-feature-symbol">🧭</div><div class="rr-feature-copy"><b>Speed cockpit</b><small>Show or hide the extra speedometer overlay.</small></div><button class="toggle on" id="rrCockpitToggle" onclick="rrToggleCockpit()" aria-label="Toggle speed cockpit"></button></div>
 </div>
-<div class="rr-settings-section-title"><span>02 / YOUR SETUP</span><small>Saved automatically on this device</small></div>
+<div class="rr-settings-section-title"><span>02 / YOUR SETUP</span><small>Personalize sound, controls, and display</small></div>
 <div class="rr-settings-actions"><button onclick="rrResetPremiumSettings()">↺ RESET CUSTOM OPTIONS</button><span id="rrSettingsStatus">All settings saved locally</span></div>
- <div class="sectionlabel">Sound</div><div class="optionrow"><span>Sound effects</span><button class="toggle on" data-setting="sound" aria-label="Toggle sound effects"></button></div><div class="optionrow"><span>Effects volume</span><input class="slider" type="range" min="0" max="100" value="80" data-setting="effectsVolume"></div><div class="optionrow"><span>Music</span><button class="toggle on" data-setting="music" aria-label="Toggle music"></button></div><div class="optionrow"><span>Music volume</span><input class="slider" type="range" min="0" max="100" value="42" data-setting="musicVolume"></div>
- <div class="sectionlabel">Controls</div><div class="optionrow" style="border:0;padding-bottom:4px"><span>Steering</span></div><div class="choicegroup" id="steeringChoices"><button class="selected" data-control="tap">Tap Sides</button><button data-control="swipe">Swipe</button><button data-control="buttons">Buttons</button></div><p class="setting-note" style="border-bottom:2px dashed #353a57;padding:8px 0 20px">Keyboard: ← → or A D to steer, Esc or P to pause. Game controllers work too.</p>
- <div class="sectionlabel">Display</div><div class="optionrow"><div><div>Full screen</div><div class="setting-note">Hide the browser bars while you play</div></div><button class="backbtn" onclick="goFullscreen()">⛶ Go full screen</button></div><div class="optionrow"><span>Focus mode (calmer screen: plain roadside, fewer effects)</span><button class="toggle" data-setting="focus"></button></div><div class="optionrow"><span>Larger text in menus</span><button class="toggle" data-setting="largeText"></button></div><div class="optionrow" style="border:0"><span>Graphics</span></div><div class="choicegroup" id="graphicsChoices"><button data-graphics="Low">Low</button><button data-graphics="Medium">Medium</button><button class="selected" data-graphics="High">High</button><button data-graphics="Ultra">Ultra</button></div><div class="optionrow"><span>Auto graphics (lowers detail if the game stutters)</span><button class="toggle on" data-setting="autoGraphics"></button></div><div class="optionrow"><span>Screen shake</span><button class="toggle on" data-setting="screenShake"></button></div><div class="optionrow"><span>Vibration</span><button class="toggle on" data-setting="vibration"></button></div><div class="optionrow"><span>Show FPS</span><button class="toggle on" data-setting="fps"></button></div><div class="sectionlabel">Driver</div><div class="optionrow" style="display:block"><b id="driverName">Driver</b><div class="setting-note"><span id="saveStatus">Offline save · This device</span></div></div><p class="setting-note"><a href="#" onclick="showInfo('Privacy policy','🔒','Your progress is stored in your browser when offline. When signed in, your game save is also synced to the game server.');return false">Privacy policy</a></p>
+
+<div class="rr-settings-section-title"><span>03 / SOUND</span><small>Make every drive feel right</small></div>
+<div class="rr-settings-card rr-settings-group">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🔊</div><div class="rr-feature-copy"><b>Sound effects</b><small>Engine, road, and in-game sounds.</small></div><button class="toggle on" data-setting="sound" aria-label="Toggle sound effects"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature rr-feature-volume"><div class="rr-feature-symbol">🎚️</div><div class="rr-feature-copy"><b>Effects volume</b><small>Adjust the volume of driving effects.</small><input class="slider rr-premium-slider" type="range" min="0" max="100" value="80" data-setting="effectsVolume" aria-label="Effects volume"></div></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🎵</div><div class="rr-feature-copy"><b>Music</b><small>Play music while you race.</small></div><button class="toggle on" data-setting="music" aria-label="Toggle music"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature rr-feature-volume"><div class="rr-feature-symbol">🎼</div><div class="rr-feature-copy"><b>Music volume</b><small>Set the background music level.</small><input class="slider rr-premium-slider" type="range" min="0" max="100" value="42" data-setting="musicVolume" aria-label="Music volume"></div></div>
+</div>
+
+<div class="rr-settings-section-title"><span>04 / CONTROLS</span><small>Choose how you steer</small></div>
+<div class="rr-settings-card rr-settings-group">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🎮</div><div class="rr-feature-copy"><b>Steering style</b><small>Pick the input that feels best on your device.</small></div></div>
+ <div class="rr-segmented rr-steering-segmented" id="steeringChoices"><button class="selected" data-control="tap">TAP SIDES</button><button data-control="swipe">SWIPE</button><button data-control="buttons">BUTTONS</button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">⌨️</div><div class="rr-feature-copy"><b>Keyboard & controller</b><small>Use ← → or A / D to steer. Press Esc or P to pause. Game controllers are supported too.</small></div></div>
+</div>
+
+<div class="rr-settings-section-title"><span>05 / DISPLAY</span><small>Set up your play space</small></div>
+<div class="rr-settings-card rr-settings-group">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">⛶</div><div class="rr-feature-copy"><b>Full screen</b><small>Hide browser bars for a more immersive drive.</small></div><button class="backbtn rr-settings-action-btn" onclick="goFullscreen()">GO FULL SCREEN</button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🎯</div><div class="rr-feature-copy"><b>Focus mode</b><small>Calmer screen with simpler roadside visuals and fewer effects.</small></div><button class="toggle" data-setting="focus" aria-label="Toggle focus mode"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🔠</div><div class="rr-feature-copy"><b>Larger menu text</b><small>Make menus easier to read.</small></div><button class="toggle" data-setting="largeText" aria-label="Toggle larger menu text"></button></div>
+</div>
+
+<div class="rr-settings-section-title"><span>06 / GRAPHICS</span><small>Balance detail and performance</small></div>
+<div class="rr-settings-card rr-settings-group">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🖥️</div><div class="rr-feature-copy"><b>Graphics quality</b><small>Choose how detailed the game looks.</small></div></div>
+ <div class="rr-segmented rr-graphics-segmented" id="graphicsChoices"><button data-graphics="Low">LOW</button><button data-graphics="Medium">MEDIUM</button><button class="selected" data-graphics="High">HIGH</button><button data-graphics="Ultra">ULTRA</button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">⚙️</div><div class="rr-feature-copy"><b>Auto graphics</b><small>Automatically lower detail if the game starts to stutter.</small></div><button class="toggle on" data-setting="autoGraphics" aria-label="Toggle auto graphics"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">〰️</div><div class="rr-feature-copy"><b>Screen shake</b><small>Enable motion feedback during driving.</small></div><button class="toggle on" data-setting="screenShake" aria-label="Toggle screen shake"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">📳</div><div class="rr-feature-copy"><b>Vibration</b><small>Use device vibration for supported events.</small></div><button class="toggle on" data-setting="vibration" aria-label="Toggle vibration"></button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">📊</div><div class="rr-feature-copy"><b>Show FPS</b><small>Display the game's frame rate while playing.</small></div><button class="toggle on" data-setting="fps" aria-label="Toggle FPS counter"></button></div>
+</div>
+
+<div class="rr-settings-section-title"><span>07 / DRIVER</span><small>Your saved profile</small></div>
+<div class="rr-settings-card rr-settings-group">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">👤</div><div class="rr-feature-copy"><b id="driverName">Driver</b><small><span id="saveStatus">Offline save · This device</span>. Sign in to sync across devices.</small></div></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🔒</div><div class="rr-feature-copy"><b>Privacy policy</b><small>Your save data and account privacy information.</small></div><button class="backbtn rr-settings-action-btn" onclick="showInfo('Privacy policy','🔒','Your progress is stored in your browser when offline. When signed in, your game save is also synced to the game server.')">VIEW</button></div>
+</div>
 </section>
 <section id="info" class="screen"><div class="screenhead"><button class="backbtn" id="infoBackBtn" type="button">‹ Back</button><h1 id="infoTitle">Information</h1><div class="balance" id="infoCash">$0</div></div><div class="modalinfo"><div class="infoicon" id="infoIcon">ℹ️</div><p id="infoText" class="setting-note" style="font-size:19px;text-align:center"></p><button class="bigbtn yellow" id="infoOkBtn" type="button">OK</button></div></section>
 <section id="jobs" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Jobs</h1><div class="balance" id="jobsCash">$0</div></div><p class="mutednote">Complete driving goals to earn bonus cash. Progress is saved with your profile.</p><div id="jobsList" class="feature-list"></div></section>
@@ -2063,39 +2109,36 @@ let THREE;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.165.0/bui
 @media(max-width:520px){#settings .rr-settings-hero{padding:17px 15px}#settings .rr-settings-card{padding:12px}#settings .optionrow{gap:10px;padding:12px 11px;font-size:13px}#settings .sectionlabel{padding:12px 11px}#settings .choicegroup{padding:10px 9px;gap:6px}#settings .choicegroup button{font-size:11px;padding:9px 5px}}
 
 
-/* Premium styling for the remaining Settings sections */
-#settings .rr-settings-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 22px;padding:12px 14px;border:1px solid #29343c;border-radius:15px;background:linear-gradient(135deg,#171f27,#10151b)}
-#settings .rr-settings-actions button{padding:10px 12px;border:1px solid #c8ff3844;border-radius:10px;background:#c8ff3810;color:#d6ff83;font:850 10px/1.2 system-ui;letter-spacing:.6px}
-#settings #rrSettingsStatus{color:#82919d;font:600 10px/1.4 system-ui}
-#settings .sectionlabel{display:flex;align-items:center;gap:10px;margin:24px 2px 10px;padding:0;border:0;color:#c8ff38;font:900 11px/1.4 system-ui;letter-spacing:1.7px;text-transform:uppercase}
-#settings .sectionlabel:before{content:"";width:4px;height:18px;border-radius:4px;background:#c8ff38;box-shadow:0 0 12px #c8ff3825}
-#settings .optionrow{position:relative;min-height:58px;gap:14px;margin:0 0 8px;padding:13px 14px;border:1px solid #29343d;border-radius:15px;background:linear-gradient(145deg,#18212a,#11171e);box-shadow:0 5px 16px #00000012;color:#eaf0f4;font:650 13px/1.45 system-ui}
-#settings .optionrow>span,#settings .optionrow>div{min-width:0;flex:1}
-#settings .optionrow .setting-note{margin-top:4px;color:#8998a5;font:500 11px/1.5 system-ui}
-#settings .optionrow:has(input[type=range]){flex-wrap:wrap}
-#settings .optionrow input[type=range]{width:100%;flex:0 0 100%;height:6px;margin:4px 0 2px;border-radius:20px;accent-color:#c8ff38;cursor:pointer}
-#settings .toggle{width:48px;height:27px;min-width:48px;border:1px solid #3a4650;border-radius:99px;background:#27313b;box-shadow:none;transition:background .18s,border-color .18s;cursor:pointer}
-#settings .toggle:before{width:19px;height:19px;top:3px;left:3px;background:#c0cad2;box-shadow:none}
-#settings .toggle.on{border-color:#c8ff38;background:#9ecb2b}
-#settings .toggle.on:before{left:24px;background:#10170a}
-#settings .choicegroup{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 10px;padding:7px;border:1px solid #29343d;border-radius:15px;background:#10161c}
-#settings #graphicsChoices{grid-template-columns:repeat(4,minmax(0,1fr))}
-#settings .choicegroup button{min-width:0;padding:11px 5px;border:1px solid #303c46;border-radius:10px;background:#19222b;color:#9eacb7;box-shadow:none;font:800 11px/1.2 system-ui;transition:background .15s,border-color .15s,color .15s}
-#settings .choicegroup button.selected{border-color:#c8ff38;background:#c8ff3817;color:#d8ff8a;box-shadow:inset 0 0 0 1px #c8ff3815}
-#settings .setting-note{color:#8998a5;font:500 11px/1.6 system-ui}
-#settings p.setting-note{margin:0 0 10px;padding:10px 13px!important;border:1px solid #29343d!important;border-radius:13px;background:#141b22}
-#settings .optionrow .backbtn{flex:0 0 auto;padding:10px 12px;border:1px solid #c8ff3840;border-radius:10px;background:#c8ff3812;color:#d6ff83;box-shadow:none;font:800 11px system-ui}
-#settings #driverName{display:block;color:#f3f6f8;font:850 14px system-ui}
-#settings a{color:#c8ff70;text-decoration:none}
-@media(max-width:520px){
- #settings .rr-settings-actions{align-items:flex-start;flex-direction:column}
- #settings .rr-settings-actions button{width:100%;min-height:40px}
- #settings .optionrow{padding:12px;gap:10px;font-size:12px}
- #settings .optionrow .backbtn{max-width:46%;white-space:normal}
- #settings .choicegroup{gap:5px;padding:6px}
- #settings .choicegroup button{font-size:10px;padding:11px 3px}
- #settings .sectionlabel{margin-top:21px}
-}
 
+/* Keep every Settings category visually consistent with the 3D Experience card */
+#settings .rr-settings-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:12px 14px;border:1px solid #29343b;border-radius:15px;background:linear-gradient(145deg,#161d25,#10151c)}
+#settings .rr-settings-actions button{padding:10px 12px;border:1px solid #c8ff3840;border-radius:10px;background:#c8ff3810;color:#d6ff83;font:850 10px system-ui;letter-spacing:.6px}
+#settings #rrSettingsStatus{color:#82919d;font:600 10px/1.4 system-ui}
+#settings .rr-settings-group{margin-bottom:4px}
+#settings .rr-settings-group .rr-settings-feature{min-height:64px}
+#settings .rr-settings-group .rr-feature-copy b{font-size:13px}
+#settings .rr-settings-group .rr-feature-copy small{font-size:11px;line-height:1.5}
+#settings .rr-settings-group .rr-settings-divider{margin:0}
+#settings .rr-settings-group .toggle{width:48px;height:27px;min-width:48px;border:1px solid #3a4650;border-radius:99px;background:#27313b;box-shadow:none;cursor:pointer}
+#settings .rr-settings-group .toggle:before{width:19px;height:19px;top:3px;left:3px;background:#c0cad2;box-shadow:none}
+#settings .rr-settings-group .toggle.on{border-color:#c8ff38;background:#9ecb2b}
+#settings .rr-settings-group .toggle.on:before{left:24px;background:#10170a}
+#settings .rr-settings-group .rr-premium-slider{display:block;width:100%;height:6px;margin:10px 0 2px;accent-color:#c8ff38}
+#settings .rr-settings-group .rr-segmented{margin-bottom:12px;padding-bottom:0}
+#settings .rr-settings-group .rr-segmented button{padding:10px 4px;font-size:10px}
+#settings .rr-settings-group .rr-steering-segmented{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0}
+#settings .rr-settings-group .rr-graphics-segmented{grid-template-columns:repeat(4,minmax(0,1fr))}
+#settings .rr-settings-group .rr-settings-action-btn{flex:0 0 auto;padding:9px 10px;border:1px solid #c8ff3840;border-radius:10px;background:#c8ff3810;color:#d6ff83;box-shadow:none;font:800 10px system-ui}
+#settings .rr-settings-group .rr-feature-volume .rr-feature-copy{align-self:center}
+@media(max-width:520px){
+ #settings .rr-settings-actions{align-items:stretch;flex-direction:column}
+ #settings .rr-settings-actions button{width:100%;min-height:40px}
+ #settings .rr-settings-group{padding-left:12px;padding-right:12px}
+ #settings .rr-settings-group .rr-settings-feature{gap:9px;padding:12px 0}
+ #settings .rr-settings-group .rr-feature-symbol{width:34px;height:34px;flex-basis:34px;font-size:16px;border-radius:11px}
+ #settings .rr-settings-group .rr-feature-copy b{font-size:12px}
+ #settings .rr-settings-group .rr-feature-copy small{font-size:10px}
+ #settings .rr-settings-group .rr-settings-action-btn{max-width:100%;font-size:9px}
+}
 </style>
 </body></html>
