@@ -657,7 +657,7 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
  <button id="roadFirebaseSignOutBtn" class="smallbtn pink" onclick="roadFirebaseSignOut()" style="width:100%;margin-top:0">SIGN OUT</button>
 </div></div></div>
 
-<script>window.__ROAD_RUSH_BUILD__="2026-10-20-cargo-run-visual-4";</script>
+<script>window.__ROAD_RUSH_BUILD__="2026-10-20-race-ui-fix-3";</script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id); const money=n=>'$'+Math.floor(n).toLocaleString('en-US');
@@ -870,24 +870,12 @@ function drawCar(x,y,w,h,color,player=false,kind='car',lean=0){
 }
 function rr(x,y,w,h,r){r=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function roadGeom(){const width=Math.min(W*.82,510),left=(W-width)/2,lanew=width/laneCount;return{left,width,lanew,right:left+width}}
-function roadCurve(y){
- const map=maps[save.selectedMap]||maps[0],detail=String(map.detail||''),p=Math.max(0,Math.min(1,y/Math.max(1,H)));
- const amp=/hairpin/i.test(detail)?Math.min(W*.105,54):/winding/i.test(detail)?Math.min(W*.075,40):Math.min(W*.025,12);
- return Math.sin(p*3.25+game.elapsed*.105+Number(save.selectedMap||0)*.58)*amp*(.2+.8*p);
-}
-function drawRoadBand(x1,x2,color){
- ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x1+roadCurve(0),0);
- for(let y=12;y<H;y+=12)ctx.lineTo(x1+roadCurve(y),y);
- ctx.lineTo(x1+roadCurve(H),H);ctx.lineTo(x2+roadCurve(H),H);
- for(let y=H-12;y>0;y-=12)ctx.lineTo(x2+roadCurve(y),y);
- ctx.lineTo(x2+roadCurve(0),0);ctx.closePath();ctx.fill();
-}
 function currentMultiplier(){const m=maps[save.selectedMap]||maps[0],match=m.detail.match(/x([0-9.]+) cash/i);return match?Number(match[1]):1}
  function mapDifficulty(){const i=Math.max(0,Math.min(19,Number(save.selectedMap)||0));return 1+i*.19+Math.pow(i/19,1.5)*1.5}
  function bossNames(){return ['NOOB','ROOKIE','SCOUT','RACER','VETERAN','ELITE','ACE','LEGEND','NIGHTMARE','MASTER']}
  function updateBossHud(){const hud=$('bossHud');if(!hud)return;const b=game.boss;$('ammoCount').textContent=String(game.weaponAmmo||0);if(!b){hud.style.display='none';return}hud.style.display='block';$('bossLabel').textContent='BOSS '+b.level+'/10 · '+b.name;$('bossHealthFill').style.width=Math.max(0,b.hp/b.maxHp*100)+'%';$('bossHint').textContent='HP '+Math.ceil(b.hp)+' / '+b.maxHp+' · Only your weapon can damage the boss'}
  window.buyBossAmmo=function(){try{if(!game.running||game.paused){showCombo('BUY AMMO DURING A RUN');return}if(game.cash<500){showCombo('NEED $500 RUN CASH FOR AMMO');return}game.cash-=500;game.weaponAmmo=(Number(game.weaponAmmo)||0)+50;save.weaponAmmo=game.weaponAmmo;updateBossHud();sound(760,.1);showCombo('-$500 RUN CASH · +50 AMMO')}catch(err){console.error('Ammo purchase failed:',err);showCombo('AMMO PURCHASE FAILED')}};
- window.fireBossWeapon=function(){if(!game.running||game.paused)return;if(!game.boss){showCombo('NO BOSS IN RANGE');return}if(game.weaponAmmo<=0){showCombo('OUT OF AMMO · BUY 50 FOR $500');return}game.weaponAmmo--;save.weaponAmmo=game.weaponAmmo;const road=roadGeom(),px=road.left+road.lanew*(game.visualLane+.5)+roadCurve(H*.79);game.bossBullets.push({x:px,y:H*.79-34});updateBossHud();sound(980,.05)};
+ window.fireBossWeapon=function(){if(!game.running||game.paused)return;if(!game.boss){showCombo('NO BOSS IN RANGE');return}if(game.weaponAmmo<=0){showCombo('OUT OF AMMO · BUY 50 FOR $500');return}game.weaponAmmo--;save.weaponAmmo=game.weaponAmmo;const road=roadGeom(),px=road.left+road.lanew*(game.visualLane+.5);game.bossBullets.push({x:px,y:H*.79-34});updateBossHud();sound(980,.05)};
 
 function roadProp(x,y,seed,side){const mapIndex=save.selectedMap;ctx.save();ctx.translate(x,y);const type=(Math.floor(seed/90)+mapIndex)%5;
  if(type===0||type===1){const size=type===0?14:10;ctx.fillStyle='#514b3d';ctx.fillRect(-2,2,4,size*.9);ctx.fillStyle=type===0?'#5d8656':'#78945e';ctx.beginPath();ctx.arc(0,0,size,0,Math.PI*2);ctx.fill();ctx.fillStyle='#9fb67a';ctx.beginPath();ctx.arc(-size*.27,-size*.26,size*.42,0,Math.PI*2);ctx.fill()}
@@ -901,18 +889,18 @@ function drawWorld(dt){
  ctx.fillStyle=map.ground;ctx.fillRect(0,0,W,H);
  const roadsideScroll=game.roadOffset*.62,stripe=roadsideScroll%155,roadsideSegment=Math.floor(roadsideScroll/155);
  if(!settings.focus){for(let row=-1;row<Math.ceil(H/155)+2;row++){const y=row*155+stripe;ctx.fillStyle=(row%2===0)?'#ffffff0b':'#1c2b2010';ctx.fillRect(0,y,left,95);ctx.fillRect(right,y,W-right,95);const seed=(row+roadsideSegment)*155;
-  roadProp(Math.max(14,left*.28+roadCurve(y+31)*.55),y+31,Math.abs(seed+13),-1);roadProp(Math.min(W-14,right+(W-right)*.68+roadCurve(y+107)*.55),y+107,Math.abs(seed+76),1);
+  roadProp(Math.max(14,left*.28),y+31,Math.abs(seed+13),-1);roadProp(Math.min(W-14,right+(W-right)*.68),y+107,Math.abs(seed+76),1);
   if(W>450){ctx.fillStyle='#8b928e';ctx.fillRect(8,y+70,Math.max(14,left*.12),26);ctx.fillStyle='#d6d4c5';ctx.fillRect(8,y+70,Math.max(14,left*.12),4);ctx.fillRect(W-Math.max(20,(W-right)*.22)-8,y+20,Math.max(20,(W-right)*.22),34)}
  }}
  // Shoulder, asphalt, edge paint and rumble strips.
- drawRoadBand(left-15,left-9,'#b3a07a');drawRoadBand(left-9,left,'#d6c9a0');drawRoadBand(right,right+9,'#d6c9a0');drawRoadBand(right+9,right+15,'#b3a07a');
- drawRoadBand(left,right,'#282d34');drawRoadBand(left+5,right-5,'#414449');
- drawRoadBand(left+3,left+7,'#ded7b9');drawRoadBand(right-7,right-3,'#ded7b9');
+ ctx.fillStyle='#d6c9a0';ctx.fillRect(left-9,0,9,H);ctx.fillRect(right,0,9,H);ctx.fillStyle='#b3a07a';ctx.fillRect(left-15,0,6,H);ctx.fillRect(right+9,0,6,H);
+ ctx.fillStyle='#282d34';ctx.fillRect(left,0,width,H);ctx.fillStyle='#414449';ctx.fillRect(left+5,0,width-10,H);
+ ctx.fillStyle='#ded7b9';ctx.fillRect(left+3,0,4,H);ctx.fillRect(right-7,0,4,H);
  // Subtle road surface grain and passing dashes.
- for(let j=0;j<42;j++){const y=((j*79+game.roadOffset*1.55)%H);const x=left+18+((j*47+Math.floor(j/4)*13)%Math.max(1,width-45))+roadCurve(y);ctx.fillStyle=j%3===0?'#f6f1d10b':'#11151b14';ctx.fillRect(x,y,j%4===0?18:8,2)}
- ctx.strokeStyle='#eee8c7';ctx.lineWidth=4;ctx.setLineDash([38,46]);ctx.lineDashOffset=-game.roadOffset*1.35;for(let i=1;i<laneCount;i++){const x=left+lanew*i;ctx.beginPath();for(let y=0;y<=H;y+=12)ctx.lineTo(x+roadCurve(y),y);ctx.stroke()}ctx.setLineDash([]);
+ for(let j=0;j<42;j++){const y=((j*79+game.roadOffset*1.55)%H);const x=left+18+((j*47+Math.floor(j/4)*13)%Math.max(1,width-45));ctx.fillStyle=j%3===0?'#f6f1d10b':'#11151b14';ctx.fillRect(x,y,j%4===0?18:8,2)}
+ ctx.strokeStyle='#eee8c7';ctx.lineWidth=4;ctx.setLineDash([38,46]);ctx.lineDashOffset=-game.roadOffset*1.35;for(let i=1;i<laneCount;i++){const x=left+lanew*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}ctx.setLineDash([]);
  // Shoulder rumble strips.
- ctx.fillStyle='#f4ecd0';for(let n=0;n<Math.ceil(H/36)+1;n++){const y=(n*36+game.roadOffset*1.8)%H,bend=roadCurve(y);ctx.fillRect(left+10+bend,y,3,17);ctx.fillRect(right-13+bend,y,3,17)}
+ ctx.fillStyle='#f4ecd0';for(let n=0;n<Math.ceil(H/36)+1;n++){const y=(n*36+game.roadOffset*1.8)%H;ctx.fillRect(left+10,y,3,17);ctx.fillRect(right-13,y,3,17)}
  // Ambient speed streaks at higher speeds, clipped to roadway.
  if(!settings.focus&&game.speed>90){ctx.save();ctx.beginPath();ctx.rect(left+10,0,width-20,H);ctx.clip();ctx.globalAlpha=Math.min(.24,(game.speed-90)/320);ctx.strokeStyle='#e4e5df';ctx.lineWidth=1;for(let i=0;i<10;i++){const x=left+20+((i*71+game.elapsed*83)%Math.max(1,width-40)),y=(i*107+game.roadOffset*2.9)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+24+game.speed*.22);ctx.stroke()}ctx.restore()}
  // Map-specific weather: layered rain, snow, and a restrained lightning flash.
@@ -920,8 +908,8 @@ function drawWorld(dt){
  if(!settings.focus&&/snow/i.test(map.detail)){ctx.save();ctx.fillStyle='#ffffff9c';for(let n=0;n<42;n++){const x=(n*97+Math.sin(game.elapsed+n)*8)%W,y=(n*113+game.roadOffset*.65)%H;ctx.beginPath();ctx.arc(x,y,1+(n%3)*.45,0,Math.PI*2);ctx.fill()}ctx.restore()}
  if(!settings.focus&&/lightning/i.test(map.detail)&&Math.sin(game.elapsed*1.7)>0.997){ctx.fillStyle='#d5e6ff28';ctx.fillRect(0,0,W,H)}
  // Pickups have individual glow styles. A collected magnet attracts money for 15 seconds.
- const playerPickupY=H*.79,playerPickupX=left+lanew*(game.visualLane+.5)+roadCurve(playerPickupY);
- for(let i=game.items.length-1;i>=0;i--){const a=game.items[i];if(dt>0)a.y+=dt*(115+game.speed*2.0)*a.pace;let x=left+lanew*(a.lane+.5)+roadCurve(a.y);
+ const playerPickupY=H*.79,playerPickupX=left+lanew*(game.visualLane+.5);
+ for(let i=game.items.length-1;i>=0;i--){const a=game.items[i];if(dt>0)a.y+=dt*(115+game.speed*2.0)*a.pace;let x=left+lanew*(a.lane+.5);
   if(game.magnetTime>0&&a.type!=='magnet'){
    if(!Number.isFinite(a.pullX))a.pullX=x;
    const tx=playerPickupX,ty=playerPickupY-6,dx=tx-a.pullX,dy=ty-a.y,dist=Math.hypot(dx,dy),ease=Math.min(1,dt*2.8);
@@ -937,16 +925,16 @@ function drawWorld(dt){
  if(game.boostTime>0){game.boostTime=Math.max(0,game.boostTime-dt);$('boostHud').classList.add('active');$('boostTimeText').textContent=game.boostTime.toFixed(1)+'s';if(game.boostTime<=0){$('boostHud').classList.remove('active');showCombo('NITRO BOOST EXPIRED')}}else $('boostHud').classList.remove('active');
  if(game.magnetTime>0){game.magnetTime=Math.max(0,game.magnetTime-dt);$('magnetHud').classList.add('active');$('magnetTimeText').textContent=game.magnetTime.toFixed(1)+'s';if(game.magnetTime<=0){$('magnetHud').classList.remove('active');showCombo('MAGNET EXPIRED')}}else{$('magnetHud').classList.remove('active')}
  // Traffic variety: compact cars, vans and trucks have separate silhouettes and pacing.
- for(let i=game.traffic.length-1;i>=0;i--){const car=game.traffic[i];if(dt>0)car.y+=dt*(78+game.speed*2.2)*car.pace*mapDifficulty();const x=left+lanew*(car.lane+.5)+roadCurve(car.y),py=H*.79;drawCar(x,car.y,Math.min(38,lanew*.50)*(car.kind==='truck'?1.08:1),car.kind==='truck'?62:car.kind==='van'?56:50,car.color,false,car.kind,Math.sin(game.elapsed*2+car.phase)*.015);
+ for(let i=game.traffic.length-1;i>=0;i--){const car=game.traffic[i];if(dt>0)car.y+=dt*(78+game.speed*2.2)*car.pace*mapDifficulty();const x=left+lanew*(car.lane+.5),py=H*.79;drawCar(x,car.y,Math.min(38,lanew*.50)*(car.kind==='truck'?1.08:1),car.kind==='truck'?62:car.kind==='van'?56:50,car.color,false,car.kind,Math.sin(game.elapsed*2+car.phase)*.015);
   const dy=Math.abs(car.y-py),dx=Math.abs((car.lane-game.lane)*lanew);
   if(car.y>H+90)game.traffic.splice(i,1);else if(game.running&&car.lane===game.lane&&dy<=(car.kind==='truck'?61:53)){crashRun()}else if(game.running&&!car.near&&car.lane!==game.lane&&Math.abs(car.lane-game.lane)===1&&dy<30&&dx<lanew*1.25){car.near=true;const reward=50+Math.floor(Math.random()*51);game.cash+=reward;floatText('⚡ NEAR MISS +$'+reward,x,car.y,'#ffe16a');showCombo('NEAR MISS  +$'+reward);sound(760,.12);persist();updateHome()}}
- if(game.boss){const b=game.boss,bx=left+lanew*(b.lane+.5)+roadCurve(b.y);drawCar(bx,b.y,Math.min(54,lanew*.76),82,b.color,false,'truck',Math.sin(game.elapsed*2+b.phase)*.025);ctx.save();ctx.fillStyle='#1a1020';ctx.fillRect(bx-35,b.y-57,70,18);ctx.fillStyle='#fff';ctx.font='900 10px system-ui';ctx.textAlign='center';ctx.fillText('BOSS '+b.level,bx,b.y-44);ctx.restore();if(game.running&&b.lane===game.lane&&Math.abs(b.y-H*.79)<66){crashRun();return}}
+ if(game.boss){const b=game.boss,bx=left+lanew*(b.lane+.5);drawCar(bx,b.y,Math.min(54,lanew*.76),82,b.color,false,'truck',Math.sin(game.elapsed*2+b.phase)*.025);ctx.save();ctx.fillStyle='#1a1020';ctx.fillRect(bx-35,b.y-57,70,18);ctx.fillStyle='#fff';ctx.font='900 10px system-ui';ctx.textAlign='center';ctx.fillText('BOSS '+b.level,bx,b.y-44);ctx.restore();if(game.running&&b.lane===game.lane&&Math.abs(b.y-H*.79)<66){crashRun();return}}
   for(const q of game.bossBullets){ctx.save();ctx.shadowColor='#ffe56d';ctx.shadowBlur=12;ctx.fillStyle='#fff2a1';ctx.beginPath();ctx.roundRect(q.x-3,q.y-9,6,18,3);ctx.fill();ctx.restore()}
-  const px=left+lanew*(game.visualLane+.5)+roadCurve(H*.79),py=H*.79,carW=Math.min(46,lanew*.60); // headlight cone
+  const px=left+lanew*(game.visualLane+.5),py=H*.79,carW=Math.min(46,lanew*.60); // headlight cone
  ctx.save();ctx.globalAlpha=.085+Math.max(0,game.speed-75)/800;ctx.fillStyle='#fff2c7';ctx.beginPath();ctx.moveTo(px-carW*.34,py-35);ctx.lineTo(px-190,py-510);ctx.lineTo(px+190,py-510);ctx.lineTo(px+carW*.34,py-35);ctx.closePath();ctx.fill();ctx.restore();
  if(settings.screenShake&&game.shake>0){game.shake=Math.max(0,game.shake-dt*2)}
  // Draw connected drivers using their live lane and distance updates.
- for(const peer of onlinePlayers.values()){if(!peer||peer.id===onlineSocketId)continue;const lane=Math.max(0,Math.min(laneCount-1,Number(peer.lane)||0));const gap=(Number(peer.km)||0)-game.km;const y=py-gap*430;if(y<-110||y>H+110)continue;const ox=left+lanew*(lane+.5)+roadCurve(y);drawCar(ox,y,Math.min(40,lanew*.52),58,peer.color||'#42d9ff',false,'car',0);ctx.save();ctx.font='800 12px system-ui';ctx.textAlign='center';ctx.textBaseline='bottom';const label=String(peer.username||'Driver').slice(0,18);const tw=Math.min(170,ctx.measureText(label).width+16);ctx.fillStyle='#10172be8';ctx.strokeStyle=peer.color||'#42d9ff';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(ox-tw/2,y-55,tw,22,8);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(label,ox,y-39,tw-8);ctx.restore();}
+ for(const peer of onlinePlayers.values()){if(!peer||peer.id===onlineSocketId)continue;const lane=Math.max(0,Math.min(laneCount-1,Number(peer.lane)||0));const gap=(Number(peer.km)||0)-game.km;const y=py-gap*430;if(y<-110||y>H+110)continue;const ox=left+lanew*(lane+.5);drawCar(ox,y,Math.min(40,lanew*.52),58,peer.color||'#42d9ff',false,'car',0);ctx.save();ctx.font='800 12px system-ui';ctx.textAlign='center';ctx.textBaseline='bottom';const label=String(peer.username||'Driver').slice(0,18);const tw=Math.min(170,ctx.measureText(label).width+16);ctx.fillStyle='#10172be8';ctx.strokeStyle=peer.color||'#42d9ff';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(ox-tw/2,y-55,tw,22,8);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(label,ox,y-39,tw-8);ctx.restore();}
  const vehicle=currentVehicle();ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=vehicle.color||'#c8ff38';ctx.shadowColor=vehicle.color||'#c8ff38';ctx.shadowBlur=16;ctx.beginPath();ctx.ellipse(px,py+15,carW*.62,10,0,0,Math.PI*2);ctx.fill();ctx.restore();drawCar(px,py,carW,66,vehicle.color,true,vehicle.kind,(game.visualLane-game.lane)*.08);
  if(settings.fps){$('fpsText').style.display='block';$('fpsText').textContent=Math.round(1/Math.max(dt,.001))+' fps'}else $('fpsText').style.display='none';$('runCash').textContent=money(game.cash);$('runKm').textContent=game.km.toFixed(1);$('runSpeed').textContent=Math.round(game.speed);const rrSpeed=$('rrCockpitSpeed'),rrBar=$('rrCockpitBar'),rrCar=$('rrCockpitCar');if(rrSpeed)rrSpeed.textContent=String(Math.round(game.speed));if(rrBar)rrBar.style.width=Math.min(100,game.speed/Math.max(1,currentVehicle().maxSpeed)*100)+'%';if(rrCar){const cv=currentVehicle();rrCar.textContent=cv.name||cv.label||cv.kind||'YOUR CAR'}$('fuelFill').style.width=game.fuel+'%';updateEngine();
 }
@@ -966,7 +954,7 @@ function loop(now){if(!$('gameview').classList.contains('active')){raf=0;return}
   const difficulty=mapDifficulty();game.spawn-=dt*difficulty;
   if(!game.boss&&game.bossLevel<10){const secondsLeft=Math.max(0,game.bossNextAt-game.elapsed);if(secondsLeft>0&&secondsLeft<=60&&game.bossWarningFor!==game.bossLevel+1){game.bossWarningFor=game.bossLevel+1;showCombo('⚠ BOSS IN 1 MINUTE');sound(520,.16)}if(game.elapsed>=game.bossNextAt){const level=game.bossLevel+1,names=bossNames(),mapIndex=Math.max(0,Number(save.selectedMap)||0),hp=Math.round((42+level*36)*(1+mapIndex*.075+Math.pow(mapIndex/19,1.5)*.8));game.bossLevel=level;game.boss={level,name:names[level-1],hp,maxHp:hp,lane:Math.floor(Math.random()*laneCount),y:-140,color:level<4?'#e85b45':level<7?'#9b5cff':'#ff2d65',phase:Math.random()*6.28,fireTimer:2.2};game.bossNextAt=game.elapsed+300;game.bossWarningFor=0;showCombo('⚠ BOSS '+level+'/10 · '+names[level-1]+' INCOMING');updateBossHud();sound(180,.25)}}
   if(game.boss){const b=game.boss;b.y+=dt*(48+game.speed*.58)*(.65+b.level*.045)*mapDifficulty();b.moveTimer=(b.moveTimer||1.5)-dt;if(b.moveTimer<=0){b.moveTimer=Math.max(.42,1.65-b.level*.105);if(Math.random()<Math.min(.88,.28+b.level*.06))b.lane=Math.max(0,Math.min(laneCount-1,b.lane+(Math.random()<.5?-1:1)))}if(b.y>H+110){b.y=-110;b.lane=Math.floor(Math.random()*laneCount)}}
-  for(let i=game.bossBullets.length-1;i>=0;i--){const q=game.bossBullets[i],road=roadGeom();q.y-=dt*560;if(q.y< -30){game.bossBullets.splice(i,1);continue}if(game.boss&&Math.abs(q.x-(road.left+road.lanew*(game.boss.lane+.5)+roadCurve(game.boss.y)))<road.lanew*.48&&Math.abs(q.y-game.boss.y)<58){game.boss.hp-=10;game.bossBullets.splice(i,1);sound(340,.04);if(game.boss.hp<=0){const defeated=game.boss,reward=1000*defeated.level;game.cash+=reward;floatText('BOSS DEFEATED +,'#ffe16a');showCombo('🏆 '+defeated.name+' BOSS DEFEATED +$'+reward);game.boss=null;game.bossBullets=[];game.bossNextAt=game.elapsed+300;game.bossWarningFor=0;updateBossHud();persist();updateHome();sound(1180,.25)}else updateBossHud()}}
+  for(let i=game.bossBullets.length-1;i>=0;i--){const q=game.bossBullets[i],road=roadGeom();q.y-=dt*560;if(q.y< -30){game.bossBullets.splice(i,1);continue}if(game.boss&&Math.abs(q.x-(road.left+road.lanew*(game.boss.lane+.5)))<road.lanew*.48&&Math.abs(q.y-game.boss.y)<58){game.boss.hp-=10;game.bossBullets.splice(i,1);sound(340,.04);if(game.boss.hp<=0){const defeated=game.boss,reward=1000*defeated.level;game.cash+=reward;floatText('BOSS DEFEATED +$'+reward,road.left+road.lanew*(defeated.lane+.5),Math.max(70,defeated.y),'#ffe16a');showCombo('🏆 '+defeated.name+' BOSS DEFEATED +$'+reward);game.boss=null;game.bossBullets=[];game.bossNextAt=game.elapsed+300;game.bossWarningFor=0;updateBossHud();persist();updateHome();sound(1180,.25)}else updateBossHud()}}
  if(game.spawn<=0){const allLanes=[...Array(laneCount).keys()];const safeLanes=allLanes.filter(n=>!game.traffic.some(car=>car.lane===n&&car.y>-390));if(safeLanes.length){let lane=safeLanes[Math.floor(Math.random()*safeLanes.length)];const kinds=['car','car','car','van','truck'],kind=kinds[Math.floor(Math.random()*(game.elapsed>28?kinds.length:kinds.length-1))];const colors=['#e9e4d7','#d84d3d','#477bd7','#a56d47','#4b5962','#2db38d','#e6b84d','#8e70c9'];game.traffic.push({lane,y:-105,color:colors[Math.floor(Math.random()*colors.length)],pace:.82+Math.random()*.28,near:false,kind,phase:Math.random()*Math.PI*2});if(Math.random()<.48){const itemLanes=allLanes.filter(n=>n===lane||Math.random()<.45);const ilane=itemLanes[Math.floor(Math.random()*itemLanes.length)]??lane;const roll=Math.random();game.items.push({lane:ilane,y:-135,type:roll<.085?'magnet':roll<.15?'boost':roll<.59?'gold':'diamond',phase:Math.random()*6.28,pace:.86+Math.random()*.2})}game.spawn=Math.max(.85,(2.25-game.elapsed*.002+Math.random()*.35)/Math.min(mapDifficulty(),1.8))}else{game.spawn=.45}}drawWorld(dt)}else{drawWorld(0);updateEngine()}}catch(error){console.error('Road Rush frame error',error);game.running=false;game.paused=true;try{updateEngine();const status=$('raceStatus');if(status)status.textContent='A game-frame error occurred. Restart or return to Menu.';if($('crashCash'))$('crashCash').textContent=money(game.cash);if($('crashKm'))$('crashKm').textContent=game.km.toFixed(1)+' km';if($('crashOverlay'))$('crashOverlay').classList.remove('hidden')}catch(recoveryError){console.error('Road Rush recovery error',recoveryError)}}}
 function moveLane(d){if(!game.running||game.paused)return;const next=Math.max(0,Math.min(laneCount-1,game.lane+d));if(next===game.lane)return;game.lane=next;sound(240,.045)}
 $('driveLeft').addEventListener('pointerdown',e=>{e.preventDefault();moveLane(-1)});$('driveRight').addEventListener('pointerdown',e=>{e.preventDefault();moveLane(1)});$('pauseBtn').addEventListener('click',()=>pauseGame());$('resumeBtn').addEventListener('click',resumeGame);$('restartBtn').addEventListener('click',()=>{finishRun(false);startRun()});$('againBtn').addEventListener('click',startRun);$('crashRestartBtn').addEventListener('click',startRun);$('quitBtn').addEventListener('click',quitGame);$('crashQuitBtn').addEventListener('click',quitGame);$('pauseSettingsBtn').addEventListener('click',()=>{if(game.running)pauseGame();$('gameview').classList.remove('active');$('app').style.display='';document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('settings').classList.add('active');current='settings';$('settingsCash').textContent=money(save.cash);syncSettings();});
@@ -1089,487 +1077,7 @@ updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJo
 </script><script>
 (()=>{let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null});window.installGame=async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch(e){}deferredInstallPrompt=null;return}if(window.showInfo)window.showInfo('Install app','📲','For the install option, open this game from its HTTPS website in Chrome, then choose Install app or Add to Home screen from the browser menu.')};window.addEventListener('load',()=>{})})();
 </script>
-<script>if("serviceWorker" in navigator && location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=cargo-run-visual-4",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("Offline shell setup skipped",err)));}</script>
-<style>
-/* ROAD RUSH IN-RACE HUD — mobile-first cockpit layout */
-#rrCockpit{position:absolute;z-index:3;right:12px;bottom:calc(24px + env(safe-area-inset-bottom));width:112px;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:1px solid #c8ff3877;border-radius:50%;background:radial-gradient(circle at 35% 25%,#273b3bee,#08111fee 70%);box-shadow:0 0 0 5px #c8ff3810,0 10px 28px #0008,inset 0 0 20px #c8ff3810;pointer-events:none;color:#f7f9ff}
-#rrCockpit .rr-speed{font:900 38px/1 Inter,system-ui,sans-serif;letter-spacing:-2px;font-variant-numeric:tabular-nums}
-#rrCockpit .rr-unit{font:800 9px/1.3 Inter,system-ui,sans-serif;letter-spacing:2px;color:#aabbd0;margin-top:4px}
-#rrCockpit .rr-carname{font:900 9px/1.2 Inter,system-ui,sans-serif;letter-spacing:1px;color:#c8ff38;text-transform:uppercase;margin-top:5px;max-width:85px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#rrCockpit .rr-speedline{height:3px;width:58px;border-radius:9px;background:#34435a;margin-top:7px;overflow:hidden}
-#rrCockpit .rr-speedline i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4fffc1,#c8ff38);box-shadow:0 0 8px #c8ff38}
-#rrCockpit .rr-camera{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font:900 8px/1 Inter,system-ui,sans-serif;letter-spacing:1.4px;color:#c8ff38;background:#142333;border:1px solid #c8ff3855;border-radius:99px;padding:4px 7px;white-space:nowrap}
-.gamehud{z-index:4}
-#onlineRaceHud{z-index:4}
-@media(max-width:500px){
- #rrCockpit{width:88px;min-height:88px;right:10px;bottom:calc(20px + env(safe-area-inset-bottom));}
- #rrCockpit .rr-speed{font-size:30px}
- #rrCockpit .rr-unit{font-size:8px;margin-top:3px}
- #rrCockpit .rr-carname{font-size:8px;margin-top:3px}
- #rrCockpit .rr-speedline{width:45px;margin-top:5px}
- #rrCockpit .rr-camera{font-size:7px;top:-7px}
- .drivebuttons{bottom:calc(22px + env(safe-area-inset-bottom));left:12px;right:112px}
- .drivebuttons button{width:61px;height:58px}
-}
-@media(max-height:520px) and (orientation:landscape){
- #rrCockpit{width:78px;min-height:78px;right:12px;bottom:12px}
- #rrCockpit .rr-speed{font-size:26px}
- #rrCockpit .rr-speedline{margin-top:3px}
- .gamehud{top:calc(4px + env(safe-area-inset-top))}
- .drivebuttons{bottom:12px}
-}
-
-/* Crash recovery: keep the death/retry UI above the canvas even after a multiplayer collision. */
-#gameview.active #crashOverlay:not(.hidden){display:flex!important;position:absolute;inset:0;z-index:1000!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
-#gameview.active #crashOverlay:not(.hidden) .overlaypanel{opacity:1!important;visibility:visible!important}
-</style>
-<script>
-/* Every client keeps its own car as the camera focus; this is only the local player's cockpit HUD. */
-(()=> {
- const addCockpit=()=>{
-  const view=document.getElementById('gameview');
-  if(!view||document.getElementById('rrCockpit'))return;
-  const panel=document.createElement('div');
-  panel.id='rrCockpit';
-  panel.setAttribute('aria-label','Your car speed and camera status');
-  panel.innerHTML='<div class="rr-camera">YOUR CAR · FOLLOW CAM</div><div class="rr-speed" id="rrCockpitSpeed">0</div><div class="rr-unit">KM/H</div><div class="rr-carname" id="rrCockpitCar">YOUR CAR</div><div class="rr-speedline"><i id="rrCockpitBar"></i></div>';
-  view.appendChild(panel);
- };
- const updateCockpit=()=>{
-  addCockpit();
-  const speed=document.getElementById('rrCockpitSpeed');
-  if(!speed)return;
-  const active=document.getElementById('gameview')?.classList.contains('active');
-  const gameObj=window.game;
-  if(!active)return;
-  const value=gameObj&&Number.isFinite(gameObj.speed)?Math.round(gameObj.speed):0;
-  speed.textContent=String(value);
-  const carLabel=document.getElementById('rrCockpitCar');
-  if(carLabel&&typeof window.currentVehicle==='function'){
-   try{const car=window.currentVehicle();carLabel.textContent=car.name||car.label||car.kind||'YOUR CAR';}catch(e){}
-  }
-  const bar=document.getElementById('rrCockpitBar');
-  if(bar){const max=gameObj&&Number.isFinite(gameObj.speed)?Math.max(1,gameObj.speed):1;bar.style.width=Math.min(100,max/240*100)+'%';}
- };
- window.addEventListener('DOMContentLoaded',()=>{addCockpit();setInterval(updateCockpit,120)});
- setTimeout(addCockpit,0);
-})();
-</script>
-<div id="roadNameModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:20px">
-<div role="dialog" aria-modal="true" aria-labelledby="roadNameTitle" style="width:min(100%,420px);background:#171a2a;color:#fff;border:1px solid #59618c;border-radius:20px;padding:24px;box-shadow:0 24px 80px #0009">
-<h2 id="roadNameTitle" style="margin:0 0 8px">What should we call you?</h2>
-<p style="color:#c3c7dd;margin:0 0 18px">Add your driver name to your Road Rush account.</p>
-<label for="roadDisplayName">YOUR NAME</label>
-<input id="roadDisplayName" maxlength="60" autocomplete="name" placeholder="Enter your name" style="width:100%;box-sizing:border-box;margin:8px 0 14px;padding:13px;border-radius:10px">
-<p id="roadNameError" role="alert" style="color:#ff8b9b;display:none"></p>
-<button id="roadNameSave" class="bigbtn yellow" style="width:100%" onclick="roadSaveName()">SAVE NAME</button>
-</div></div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdToken, updateProfile, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
-
-// Replace these values with your Firebase web-app config from Firebase Console.
-const firebaseConfig = {
-  apiKey: "AIzaSyBivNoqu5OpFocrZbcHpNpBhAnnWeBiv_M",
-  authDomain: "roadrush-dd71f.firebaseapp.com",
-  projectId: "roadrush-dd71f",
-  storageBucket: "roadrush-dd71f.firebasestorage.app",
-  messagingSenderId: "400493851121",
-  appId: "1:400493851121:web:784ea517c01b9277c1d450",
-  measurementId: "G-SS4ZCYGC1W"
-};
-let roadAuth = null, roadFunctions = null, roadOtpPending = false, roadNameResolve = null;
-const roadAuthStatus = (message, error = false) => {
-  const el = document.getElementById("roadAuthStatus");
-  if (el) { el.textContent = message; el.style.color = error ? "#ff8b9b" : "#b9bad1"; }
-};
-const roadAuthConfigured = () => {
-  if (!firebaseConfig.apiKey || firebaseConfig.apiKey.startsWith("REPLACE_") || firebaseConfig.projectId.startsWith("REPLACE_")) {
-    roadAuthStatus("Firebase is not configured yet. Follow FIREBASE-AUTH-SETUP.md and add your Firebase web config.", true);
-    return false;
-  }
-  return true;
-};
-let roadCloudReady=false, roadCloudTimer=null, roadCloudBusy=false;
-function setRoadCloudState(message,error=false){
- window.roadCloudSaveState=message;
- const state=document.getElementById("roadProfileSaveState");if(state){state.textContent=message;state.style.color=error?"#ff8b9b":"#65e9be"}
- const saveStatus=document.getElementById("saveStatus");if(saveStatus)saveStatus.textContent=message;
- if(typeof window.updateAccountUi==="function")window.updateAccountUi();
-}
-function mergeRoadRushProgress(local, remote){
- const base=local&&typeof local==="object"?local:{};
- const cloud=remote&&typeof remote==="object"?remote:{};
- const merged={...base,...cloud};
- for(const key of ["cash","best","runs","km","jobs","prestige","day","pickups","longestRunKm","challengeKm"]){
-  merged[key]=Math.max(0,Number(base[key])||0,Number(cloud[key])||0);
- }
- if(base.weaponAmmo!==undefined||cloud.weaponAmmo!==undefined)merged.weaponAmmo=Math.max(0,Number(base.weaponAmmo)||0,Number(cloud.weaponAmmo)||0);
- for(const key of ["unlocked","carsUnlocked","jobsClaimed","redeemedCodes"]){
-  const a=Array.isArray(base[key])?base[key]:[];
-  const b=Array.isArray(cloud[key])?cloud[key]:[];
-  merged[key]=[...new Set([...a,...b])];
- }
- const today=typeof todayKey==="function"?todayKey():"";
- const latestClaimDate=[String(base.claimDate||""),String(cloud.claimDate||"")].sort().pop();
- merged.claimDate=latestClaimDate;
- merged.claimed=latestClaimDate===today&&((base.claimDate===latestClaimDate&&base.claimed===true)||(cloud.claimDate===latestClaimDate&&cloud.claimed===true));
- const latestChallengeDate=[String(base.challengeDate||""),String(cloud.challengeDate||"")].sort().pop();
- merged.challengeDate=latestChallengeDate;
- if(base.challengeDate===latestChallengeDate&&cloud.challengeDate===latestChallengeDate){
-  merged.challengeDone=base.challengeDone===true||cloud.challengeDone===true;
-  merged.challengeKm=Math.max(Number(base.challengeKm)||0,Number(cloud.challengeKm)||0);
- }else if(base.challengeDate===latestChallengeDate){
-  merged.challengeDone=base.challengeDone===true;
-  merged.challengeKm=Number(base.challengeKm)||0;
- }else{
-  merged.challengeDone=cloud.challengeDone===true;
-  merged.challengeKm=Number(cloud.challengeKm)||0;
- }
- if(!merged.driver||merged.driver==="Driver")merged.driver=cloud.driver||base.driver||"Driver";
- const localHasProgress=(Number(base.cash)||0)>0||(Number(base.best)||0)>0||(Number(base.runs)||0)>0||(Number(base.km)||0)>0||(base.unlocked?.length||0)>1||(base.carsUnlocked?.length||0)>1;
- const lm=Number(base.selectedMap),cm=Number(cloud.selectedMap);
- merged.selectedMap=localHasProgress&&Number.isInteger(lm)&&merged.unlocked.includes(lm)?lm:Number.isInteger(cm)&&merged.unlocked.includes(cm)?cm:Number.isInteger(lm)&&merged.unlocked.includes(lm)?lm:0;
- const lc=Number(base.selectedCar),cc=Number(cloud.selectedCar);
- merged.selectedCar=localHasProgress&&Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:Number.isInteger(cc)&&merged.carsUnlocked.includes(cc)?cc:Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:0;
- return merged;
-}
-async function roadActivateCloudSave(user){
- if(!user||!roadFunctions)return;
- roadCloudReady=false;
- try{
-  const token=await user.getIdTokenResult();
-  const provider=token.claims.firebase?.sign_in_provider||"";
-  if(provider==="password"&&token.claims.emailOtpVerified!==true){
-   setRoadCloudState("Verify your six-digit email code to enable secure cloud saves.",false);
-   return;
-  }
-  setRoadCloudState("Restoring account progress…");
-  const localBefore=window.getRoadRushCloudSnapshot?.()||{};
-  const call=httpsCallable(roadFunctions,"savePlayerProgress");
-  const response=await call({action:"load"});
-  const data=response.data||{};
-  if(data.save&&typeof window.applyRoadRushCloudSnapshot==="function"){
-   window.applyRoadRushCloudSnapshot((window.mergeRoadRushProgress||mergeRoadRushProgress)(localBefore,data.save));
-  }else if(typeof window.getRoadRushCloudSnapshot==="function"){
-   await call({action:"save",save:window.getRoadRushCloudSnapshot()});
-  }
-  roadCloudReady=true;
-  if(data.save)window.queueRoadRushCloudSave?.();
-  setRoadCloudState("Cloud saved · cash, cars, maps, settings and progress are synced.");
- }catch(error){
-  roadCloudReady=false;
-  setRoadCloudState("Cloud save unavailable: "+(error.message||"check Firebase Functions deployment"),true);
-  roadAuthStatus("You are signed in, but cloud sync failed: "+(error.message||"unknown error"),true);
- }
-}
-window.roadActivateCloudSave=roadActivateCloudSave;
-window.queueRoadRushCloudSave=function(){
- if(!roadCloudReady||!roadAuth?.currentUser||!roadFunctions)return;
- clearTimeout(roadCloudTimer);
- roadCloudTimer=setTimeout(async()=>{
-  if(roadCloudBusy||!roadCloudReady||!roadAuth?.currentUser)return;
-  roadCloudBusy=true;
-  const uid=roadAuth.currentUser.uid, snapshot=window.getRoadRushCloudSnapshot?.();
-  if(!snapshot){roadCloudBusy=false;return}
-  try{
-   await httpsCallable(roadFunctions,"savePlayerProgress")({action:"save",save:snapshot});
-   if(roadAuth?.currentUser?.uid===uid)setRoadCloudState("Cloud saved · cash, cars, maps, settings and progress are synced.");
-  }catch(error){setRoadCloudState("Cloud sync failed · local progress is safe on this device.",true);console.warn("Road Rush cloud save failed",error)}
-  finally{roadCloudBusy=false;if(roadCloudReady&&roadAuth?.currentUser?.uid===uid&&JSON.stringify(snapshot)!==JSON.stringify(window.getRoadRushCloudSnapshot?.()))window.queueRoadRushCloudSave()}
- },850)
-};
-window.roadRedeemSpecialCode=async function(code){
- if(!roadAuth?.currentUser||!roadFunctions)throw new Error("Sign in with Google or verified email first.");
- if(!roadCloudReady)await roadActivateCloudSave(roadAuth.currentUser);
- if(!roadCloudReady)throw new Error("Cloud save must connect before using the global one-time reward code.");
- const token=await roadAuth.currentUser.getIdTokenResult();
- if(token.claims.firebase?.sign_in_provider==="password"&&token.claims.emailOtpVerified!==true)throw new Error("Verify the six-digit email code before redeeming this account-only code.");
- const result=await httpsCallable(roadFunctions,"redeemRoadRushCode")({code});
- if(!result.data?.ok||!result.data?.save)throw new Error("The reward service returned an invalid response.");
- return result.data;
-};
-function initRoadAuth() {
-  if (!roadAuthConfigured()) return false;
-  try {
-    const app = initializeApp(firebaseConfig);
-    roadAuth = getAuth(app);
-    roadFunctions = getFunctions(app, "us-central1");
-    onAuthStateChanged(roadAuth, async user => {
-      window.roadFirebaseUser = user || null;
-      if (typeof window.updateAccountUi === "function") window.updateAccountUi();
-      const label = document.getElementById("roadAuthUser");
-      if (label) label.textContent = user ? "Account: " + (user.displayName || user.email || "Firebase user") : "Sign in to your account";
-      const cloudLabel = document.getElementById("cloudButtonLabel");
-      if (cloudLabel && !window.cloudToken) cloudLabel.textContent = user ? "Signed in: " + (user.displayName || user.email || "driver") : "Sign in to save online";
-      const saveStatus = document.getElementById("saveStatus");
-      if (saveStatus && !window.cloudToken) saveStatus.textContent = user ? "Signed in as " + (user.displayName || user.email) + " · progress is currently saved on this device" : "Offline save · This device";
-      // Run the profile switch after all user/session labels have been refreshed.
-      if (typeof window.updateAccountUi === "function") window.updateAccountUi();
-      if (typeof window.updateHome === "function") window.updateHome();
-      if(user) await roadActivateCloudSave(user);
-      else {roadCloudReady=false;setRoadCloudState("Saved on this device · sign in to sync across devices");}
-    });
-    return true;
-  } catch (error) {
-    roadAuthStatus("Firebase initialization failed. Check the web config: " + error.message, true);
-    return false;
-  }
-}
-async function roadSendOtp() {
-  const requestEmailOtp = httpsCallable(roadFunctions, "requestEmailOtp");
-  await requestEmailOtp({});
-  roadOtpPending = true;
-  document.getElementById("roadOtpArea").style.display = "block";
-  roadAuthStatus("A six-digit code was sent to your email. It expires in 10 minutes.");
-}
-window.roadEmailAuth = async function(mode) {
-  if (!roadAuth && !initRoadAuth()) return;
-  const email = document.getElementById("roadAuthEmail").value.trim();
-  const password = document.getElementById("roadAuthPassword").value;
-  if (!email || password.length < 8) return roadAuthStatus("Enter a valid email and a password of at least 8 characters.", true);
-  const buttons = [document.getElementById("roadEmailLogin"), document.getElementById("roadEmailSignup")];
-  buttons.forEach(b => b.disabled = true);
-  try {
-    await setPersistence(roadAuth, browserLocalPersistence);
-    if (mode === "signup") await createUserWithEmailAndPassword(roadAuth, email, password);
-    else await signInWithEmailAndPassword(roadAuth, email, password);
-    await roadAskForName();
-    await roadSendOtp();
-  } catch (error) {
-    const messages = {
-      "auth/email-already-in-use":"An account already exists for this email. Sign in instead.",
-      "auth/invalid-credential":"Email or password is incorrect.",
-      "auth/invalid-email":"Enter a valid email address.",
-      "auth/weak-password":"Use a stronger password of at least 8 characters.",
-      "functions/failed-precondition":"Email delivery is not configured on the server yet."
-    };
-    roadAuthStatus(messages[error.code] || error.message || "Authentication failed.", true);
-  } finally { buttons.forEach(b => b.disabled = false); }
-};
-window.roadGoogleSignIn = async function() {
-  if (!roadAuth && !initRoadAuth()) return;
-  try {
-    await setPersistence(roadAuth, browserLocalPersistence);
-    const result = await signInWithPopup(roadAuth, new GoogleAuthProvider());
-    const name = await roadAskForName();
-    document.getElementById("roadOtpArea").style.display = "none";
-    roadOtpPending = false;
-    roadAuthStatus("Welcome, " + name + "! You are signed in with Google. Email OTP is not required for Google sign-in.");
-    const user = document.getElementById("roadAuthUser");
-    if (user) user.textContent = "Driver name: " + name;
-    window.roadFirebaseUser = roadAuth.currentUser;
-    if (typeof window.updateAccountUi === "function") window.updateAccountUi();
-    if (typeof window.closeAccount === "function") window.closeAccount();
-  } catch (error) {
-    roadAuthStatus(error.message || "Google sign-in failed.", true);
-  }
-};
-window.roadVerifyOtp = async function() {
-  if (!roadAuth || !roadAuth.currentUser || !roadOtpPending) return roadAuthStatus("Sign in with email and password first.", true);
-  const code = document.getElementById("roadAuthOtp").value.trim();
-  if (!/^\d{6}$/.test(code)) return roadAuthStatus("Enter the six-digit code from your email.", true);
-  try {
-    const verifyEmailOtp = httpsCallable(roadFunctions, "verifyEmailOtp");
-    await verifyEmailOtp({ code });
-    await getIdToken(roadAuth.currentUser, true);
-    await roadActivateCloudSave(roadAuth.currentUser);
-    roadOtpPending = false;
-    document.getElementById("roadOtpArea").style.display = "none";
-    roadAuthStatus("Welcome, " + (roadAuth.currentUser.displayName || roadAuth.currentUser.email) + "! Your email code is verified.");
-  } catch (error) { roadAuthStatus(error.message || "That code is invalid or expired.", true); }
-};
-window.roadResendOtp = async function() {
-  if (!roadAuth || !roadAuth.currentUser) return roadAuthStatus("Sign in first to request a code.", true);
-  try { await roadSendOtp(); } catch (error) { roadAuthStatus(error.message || "Could not send a new code.", true); }
-};
-window.roadAskForName = function() {
-  const modal = document.getElementById("roadNameModal");
-  const input = document.getElementById("roadDisplayName");
-  const error = document.getElementById("roadNameError");
-  input.value = roadAuth?.currentUser?.displayName || "";
-  error.style.display = "none";
-  modal.style.display = "flex";
-  setTimeout(() => input.focus(), 30);
-  return new Promise(resolve => { roadNameResolve = resolve; });
-};
-window.roadEditProfileName = async function() {
-  if (!roadAuth?.currentUser) return roadAuthStatus("Please sign in again.", true);
-  try {
-    await roadAskForName();
-    window.roadFirebaseUser = roadAuth.currentUser;
-    if (typeof window.updateAccountUi === "function") window.updateAccountUi();
-    if (typeof window.updateHome === "function") window.updateHome();
-  } catch (e) { roadAuthStatus(e.message || "Could not edit driver name.", true); }
-};
-window.roadSaveName = async function() {
-  const input = document.getElementById("roadDisplayName");
-  const name = input.value.trim();
-  const error = document.getElementById("roadNameError");
-  const button = document.getElementById("roadNameSave");
-  if (name.length < 2 || name.length > 60) {
-    error.textContent = "Enter a name between 2 and 60 characters.";
-    error.style.display = "block";
-    return;
-  }
-  if (!roadAuth?.currentUser) {
-    error.textContent = "Please sign in again.";
-    error.style.display = "block";
-    return;
-  }
-  button.disabled = true;
-  try {
-    await updateProfile(roadAuth.currentUser, { displayName: name });
-    window.roadFirebaseUser = roadAuth.currentUser;
-    if (typeof window.setRoadRushDriverName === "function") window.setRoadRushDriverName(name);
-    document.getElementById("roadNameModal").style.display = "none";
-    const user = document.getElementById("roadAuthUser");
-    if (user) user.textContent = "Driver name: " + name;
-    const resolve = roadNameResolve;
-    roadNameResolve = null;
-    if (resolve) resolve(name);
-  } catch (e) {
-    error.textContent = e.message || "Could not save your name.";
-    error.style.display = "block";
-  } finally { button.disabled = false; }
-};
-window.roadFirebaseSignOut = async function() {
-  if (roadAuth) await signOut(roadAuth);
-  roadCloudReady = false;
-  setRoadCloudState("Signed out · progress remains saved on this device");
-  roadOtpPending = false;
-  roadAuthStatus("Signed out of Firebase.");
-  if (typeof window.updateAccountUi === "function") window.updateAccountUi();
-};
-// Initialize at page load so Firebase can restore the persisted Google session.
-initRoadAuth();
-</script>
-</body></html>
-+reward,road.left+road.lanew*(defeated.lane+.5)+roadCurve(defeated.y),Math.max(70,defeated.y),'#ffe16a');showCombo('🏆 '+defeated.name+' BOSS DEFEATED +$'+reward);game.boss=null;game.bossBullets=[];game.bossNextAt=game.elapsed+300;game.bossWarningFor=0;updateBossHud();persist();updateHome();sound(1180,.25)}else updateBossHud()}}
- if(game.spawn<=0){const allLanes=[...Array(laneCount).keys()];const safeLanes=allLanes.filter(n=>!game.traffic.some(car=>car.lane===n&&car.y>-390));if(safeLanes.length){let lane=safeLanes[Math.floor(Math.random()*safeLanes.length)];const kinds=['car','car','car','van','truck'],kind=kinds[Math.floor(Math.random()*(game.elapsed>28?kinds.length:kinds.length-1))];const colors=['#e9e4d7','#d84d3d','#477bd7','#a56d47','#4b5962','#2db38d','#e6b84d','#8e70c9'];game.traffic.push({lane,y:-105,color:colors[Math.floor(Math.random()*colors.length)],pace:.82+Math.random()*.28,near:false,kind,phase:Math.random()*Math.PI*2});if(Math.random()<.48){const itemLanes=allLanes.filter(n=>n===lane||Math.random()<.45);const ilane=itemLanes[Math.floor(Math.random()*itemLanes.length)]??lane;const roll=Math.random();game.items.push({lane:ilane,y:-135,type:roll<.085?'magnet':roll<.15?'boost':roll<.59?'gold':'diamond',phase:Math.random()*6.28,pace:.86+Math.random()*.2})}game.spawn=Math.max(.85,(2.25-game.elapsed*.002+Math.random()*.35)/Math.min(mapDifficulty(),1.8))}else{game.spawn=.45}}drawWorld(dt)}else{drawWorld(0);updateEngine()}}catch(error){console.error('Road Rush frame error',error);game.running=false;game.paused=true;try{updateEngine();const status=$('raceStatus');if(status)status.textContent='A game-frame error occurred. Restart or return to Menu.';if($('crashCash'))$('crashCash').textContent=money(game.cash);if($('crashKm'))$('crashKm').textContent=game.km.toFixed(1)+' km';if($('crashOverlay'))$('crashOverlay').classList.remove('hidden')}catch(recoveryError){console.error('Road Rush recovery error',recoveryError)}}}
-function moveLane(d){if(!game.running||game.paused)return;const next=Math.max(0,Math.min(laneCount-1,game.lane+d));if(next===game.lane)return;game.lane=next;sound(240,.045)}
-$('driveLeft').addEventListener('pointerdown',e=>{e.preventDefault();moveLane(-1)});$('driveRight').addEventListener('pointerdown',e=>{e.preventDefault();moveLane(1)});$('pauseBtn').addEventListener('click',()=>pauseGame());$('resumeBtn').addEventListener('click',resumeGame);$('restartBtn').addEventListener('click',()=>{finishRun(false);startRun()});$('againBtn').addEventListener('click',startRun);$('crashRestartBtn').addEventListener('click',startRun);$('quitBtn').addEventListener('click',quitGame);$('crashQuitBtn').addEventListener('click',quitGame);$('pauseSettingsBtn').addEventListener('click',()=>{if(game.running)pauseGame();$('gameview').classList.remove('active');$('app').style.display='';document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('settings').classList.add('active');current='settings';$('settingsCash').textContent=money(save.cash);syncSettings();});
-canvas.addEventListener('pointerdown',e=>{if(!game.running||game.paused||settings.buttons)return;if(settings.swipe){canvas.setPointerCapture?.(e.pointerId);canvas.dataset.startx=e.clientX;canvas.dataset.starty=e.clientY;return}moveLane(e.clientX<W/2?-1:1)});canvas.addEventListener('pointerup',e=>{if(settings.swipe&&canvas.dataset.startx!==undefined&&canvas.dataset.startx!==''){let dx=e.clientX-Number(canvas.dataset.startx),dy=e.clientY-Number(canvas.dataset.starty);if(Math.abs(dx)>24&&Math.abs(dx)>Math.abs(dy)*.8)moveLane(dx<0?-1:1);canvas.dataset.startx='';canvas.dataset.starty=''}});
-addEventListener('keydown',e=>{if(e.key==='Escape'&&$('accountModal').classList.contains('open')){closeAccount();return}if(['ArrowLeft','ArrowRight',' ','ArrowUp','ArrowDown'].includes(e.key))e.preventDefault();if(e.key==='Escape'||e.key.toLowerCase()==='p'){if(game.running)pauseGame();else if(game.paused)resumeGame();return}if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')moveLane(-1);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')moveLane(1);if(e.key===' '||e.key.toLowerCase()==='f')fireBossWeapon();if(e.key==='Enter'&&game.dead)startRun()},{passive:false});
-// A lightweight settings resume path from game pause.
-function restoreGameFromSettings(){if(current==='settings'&&game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');}}
-$('settings').querySelector('.backbtn').addEventListener('click',()=>{if(game.paused){$('app').style.display='none';$('gameview').classList.add('active');$('pauseOverlay').classList.remove('hidden');current='game';resize()}else showScreen('home')});
-// Cloudflare Durable Objects WebSocket multiplayer client.
-let onlineSocket=null,onlineSocketId='',onlineRoom='',onlinePlayers=new Map(),onlineLastSent=0,onlineResultHandled=false,onlineMatchStarted=false,onlineRunStarted=false;
-function onlineConnected(){return !!onlineSocket&&onlineSocket.readyState===WebSocket.OPEN}
-function raceStatus(message){const el=$('raceStatus');if(el)el.textContent=message}
-function sendOnlinePacket(event,data){if(onlineConnected())onlineSocket.send(JSON.stringify({event,data}))}
-function updateOnlineHud(){
- const hud=$('onlineRaceHud');if(!hud)return;
- hud.style.display=onlineConnected()?'block':'none';
- $('onlineRoomLabel').textContent=onlineRoom?' · ROOM '+onlineRoom:'';
- const peers=Array.from(onlinePlayers.values()).filter(p=>p&&p.id!==onlineSocketId);
- $('onlinePlayersLabel').textContent=peers.length?peers.map(p=>(p.username||'Driver')+' '+Math.round(Number(p.speed)||0)+' km/h').join(' · '):'Connected — waiting for your opponent.';
-}
-window.connectOnlineRace=function(){
- if(onlineSocket&&(onlineSocket.readyState===WebSocket.CONNECTING||onlineSocket.readyState===WebSocket.OPEN)){
-  raceStatus(onlineSocket.readyState===WebSocket.OPEN?'Already connected to room '+(onlineRoom||'')+'. Share the room code with your friend.':'Connecting to your race room…');
-  return;
- }
- const urlInput=$('raceServerUrl'),nameInput=$('raceUsername'),roomInput=$('raceRoomCode');
- const raw=(urlInput.value||localStorage.getItem('road_rush_multiplayer_url')||'').trim();
- const username=(nameInput.value||save.driver||'Driver').trim().slice(0,18)||'Driver';
- const enteredCode=(roomInput.value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
- const createRoom=!enteredCode;
- const roomCode=enteredCode||Math.random().toString(36).slice(2,8).toUpperCase();
- if(!raw){raceStatus('Enter your Cloudflare Worker URL first.');return}
- let serverUrl;
- try{const u=new URL(raw);if(!['https:','http:'].includes(u.protocol))throw new Error();serverUrl=u.origin}
- catch{raceStatus('Enter a valid Cloudflare Worker URL, such as https://your-worker.your-subdomain.workers.dev');return}
- localStorage.setItem('road_rush_multiplayer_url',serverUrl);
- nameInput.value=username;roomInput.value=roomCode;
- raceStatus('Connecting to Cloudflare race server…');
- if(onlineSocket){try{onlineSocket.close()}catch{}onlineSocket=null}
- onlinePlayers.clear();onlineSocketId='';onlineRoom=roomCode;onlineResultHandled=false;onlineMatchStarted=false;onlineRunStarted=false;updateOnlineHud();
- const wsUrl=new URL(serverUrl);
- wsUrl.protocol=wsUrl.protocol==='https:'?'wss:':'ws:';
- wsUrl.pathname='/ws';wsUrl.search='';
- wsUrl.searchParams.set('roomCode',roomCode);wsUrl.searchParams.set('username',username);
- wsUrl.searchParams.set('wallet',String(Math.max(0,Math.floor(Number(save.cash)||0))));
- wsUrl.searchParams.set('create',createRoom?'1':'0');
- onlineSocket=new WebSocket(wsUrl.toString());
- onlineSocket.onopen=()=>raceStatus('Connected to Cloudflare — joining room '+roomCode+'…');
- onlineSocket.onmessage=event=>{
-  let packet;try{packet=JSON.parse(event.data)}catch{return}
-  const data=packet.data||{};
-  if(packet.event==='race:joined'){
-   onlineSocketId=data.playerId||onlineSocketId||'';
-   onlineRoom=data.roomCode||roomCode;
-   onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-   updateOnlineHud();
-   if(onlinePlayers.size>=2)launchOnlineRunWhenReady();
-   else raceStatus('Room '+onlineRoom+' created. Waiting for your opponent to join…');
-  }else if(packet.event==='race:players'){
-   onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-   // Keep the server-issued socket ID. Matching by username breaks when both friends use "Driver".
-   updateOnlineHud();launchOnlineRunWhenReady();
-  }else if(packet.event==='race:state'){
-   if(data&&data.id)onlinePlayers.set(data.id,data);
-   updateOnlineHud();
-  }else if(packet.event==='race:start'){
-   onlineMatchStarted=true;raceStatus('RACE STARTED! First to crash loses. Winner earns a fixed 100-coin bonus.');
-  }else if(packet.event==='race:result'){
-   if(onlineResultHandled)return;onlineResultHandled=true;
-   const amount=Math.max(0,Math.floor(Number(data.amount)||0));
-   if(data.reason==='draw'){
-    raceStatus('DRAW — no bonus awarded.');
-    showCombo('RACE DRAW · NO BONUS');
-   }else if(data.winnerId===onlineSocketId){
-    save.cash=Math.max(0,Math.floor(Number(save.cash)||0))+amount;persist();updateHome();
-    raceStatus('YOU WIN! +'+money(amount)+' bonus coins.');
-    showCombo('RACE WON · +'+money(amount));
-   }else{
-    raceStatus('RACE LOST — your coins are safe. Try again!');
-    showCombo('RACE LOST · YOUR COINS ARE SAFE');
-   }
-  }else if(packet.event==='race:error'){
-   raceStatus(data.message||'Cloudflare race server error.');
-  }
- };
- onlineSocket.onerror=()=>raceStatus('Could not connect. Check that the Cloudflare Worker is deployed and the URL is correct.');
- onlineSocket.onclose=()=>{onlinePlayers.clear();onlineSocketId='';updateOnlineHud();if(!onlineResultHandled)raceStatus('Disconnected from Cloudflare multiplayer. Solo play still works.')};
-};
-function launchOnlineRunWhenReady(){
- if(onlineRunStarted||!onlineConnected()||onlinePlayers.size<2)return;
- onlineRunStarted=true;raceStatus('Both drivers connected — race starting!');
- showScreen('home');startRun();$('onlineRaceHud').style.display='block';updateOnlineHud();
-}
-function gameviewActive(){return $('gameview')?.classList.contains('active')}
-function sendOnlineState(){
- if(!onlineConnected()||!onlineRoom||!gameviewActive())return;
- const now=performance.now();if(now-onlineLastSent<100)return;onlineLastSent=now;
- sendOnlinePacket('race:update',{lane:game.lane,km:Math.max(0,Math.min(100000,game.km)),speed:Math.max(0,Math.min(500,game.speed)),running:!!game.running,lost:!!game.dead,color:currentVehicle()?.color||'#42d9ff'});
-}
-setInterval(()=>{if(onlineConnected()&&onlineRoom&&gameviewActive())sendOnlineState()},100);
-const previousStartRun=startRun;startRun=function(){previousStartRun();if(onlineConnected()&&onlineRoom){$('onlineRaceHud').style.display='block';updateOnlineHud()}};window.startRun=startRun;
-const previousQuitGame=quitGame;quitGame=function(){previousQuitGame();if(onlineSocket){try{sendOnlinePacket('race:leave',{});onlineSocket.close()}catch{}onlineSocket=null}onlineRoom='';onlinePlayers.clear();onlineMatchStarted=false;updateOnlineHud()};window.quitGame=quitGame;
-window.copyRaceRoom=async function(){
- const room=String($('raceRoomCode')?.value||onlineRoom||'').trim().toUpperCase();
- if(!room){raceStatus('Create a room first so you have a code to share.');return}
- try{await navigator.clipboard.writeText(room);raceStatus('Room code '+room+' copied. Send it to your friend!')}
- catch{const input=$('raceRoomCode');if(input){input.focus();input.select();raceStatus('Select and copy this room code: '+room)}}
-};
-window.shareRaceInvite=async function(){
- const room=String($('raceRoomCode')?.value||onlineRoom||'').trim().toUpperCase();
- if(!room){raceStatus('Create a room first, then invite your friend with its code.');return}
- const url=new URL(location.href);url.search='';url.searchParams.set('room',room);url.hash='';
- const payload={title:'Road Rush — Race Invite',text:'Join my Road Rush race: '+room,url:url.toString()};
- try{if(navigator.share){await navigator.share(payload);raceStatus('Race invite ready to send. Room: '+room)}else{await navigator.clipboard.writeText(payload.text+'\n'+payload.url);raceStatus('Invite link copied. Send it to your friend!')}}
- catch(e){if(e&&e.name==='AbortError')return;try{await navigator.clipboard.writeText(payload.text+'\n'+payload.url);raceStatus('Invite link copied. Send it to your friend!')}catch{raceStatus('Room code: '+room+' · Invite link: '+payload.url)}}
-};
-
-updateHome();renderMaps();renderGarage();syncSettings();configureRoad();renderJobs();renderAchievements();updateAccountUi();if($('raceServerUrl')){let savedRaceUrl=localStorage.getItem('road_rush_multiplayer_url')||'';if(!savedRaceUrl||savedRaceUrl.includes('onrender.com')||savedRaceUrl.includes('your-subdomain.workers.dev')||savedRaceUrl.includes('your-worker.')){savedRaceUrl='https://road-rush1.maroduhoki6.workers.dev';localStorage.setItem('road_rush_multiplayer_url',savedRaceUrl)}$('raceServerUrl').value=savedRaceUrl;}if($('raceUsername'))$('raceUsername').value=save.driver||'Driver';const inviteRoom=new URLSearchParams(location.search).get('room');if(inviteRoom&&$('raceRoomCode'))$('raceRoomCode').value=inviteRoom.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,8);$('accountModal').addEventListener('click',e=>{if(e.target===$('accountModal'))closeAccount()});$('roadAuthPassword').addEventListener('keydown',e=>{if(e.key==='Enter')window.roadEmailAuth?.('login')});$('roadAuthEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('roadAuthPassword').focus()});if(settings.largeText)document.body.style.fontSize='1.08em';drawWorld(0);if(cloudToken)loadCloudSave(true);
-})();
-</script><script>
-(()=>{let deferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null});window.installGame=async()=>{if(deferredInstallPrompt){deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch(e){}deferredInstallPrompt=null;return}if(window.showInfo)window.showInfo('Install app','📲','For the install option, open this game from its HTTPS website in Chrome, then choose Install app or Add to Home screen from the browser menu.')};window.addEventListener('load',()=>{})})();
-</script>
-<script>if("serviceWorker" in navigator && location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=cargo-run-visual-4",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("Offline shell setup skipped",err)));}</script>
+<script>if("serviceWorker" in navigator && location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=race-ui-fix-3",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("Offline shell setup skipped",err)));}</script>
 <style>
 /* ROAD RUSH IN-RACE HUD — mobile-first cockpit layout */
 #rrCockpit{position:absolute;z-index:3;right:12px;bottom:calc(24px + env(safe-area-inset-bottom));width:112px;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:1px solid #c8ff3877;border-radius:50%;background:radial-gradient(circle at 35% 25%,#273b3bee,#08111fee 70%);box-shadow:0 0 0 5px #c8ff3810,0 10px 28px #0008,inset 0 0 20px #c8ff3810;pointer-events:none;color:#f7f9ff}
