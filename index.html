@@ -987,18 +987,15 @@ window.connectOnlineRace=function(){
   let packet;try{packet=JSON.parse(event.data)}catch{return}
   const data=packet.data||{};
   if(packet.event==='race:joined'){
-   onlineSocketId=onlineSocketId||data.playerId||'';
+   onlineSocketId=data.playerId||onlineSocketId||'';
    onlineRoom=data.roomCode||roomCode;
    onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-   const me=Array.from(onlinePlayers.values()).find(p=>p.username===username);
-   if(me)onlineSocketId=me.id;
    updateOnlineHud();
    if(onlinePlayers.size>=2)launchOnlineRunWhenReady();
    else raceStatus('Room '+onlineRoom+' created. Waiting for your opponent to join…');
   }else if(packet.event==='race:players'){
    onlinePlayers=new Map((data.players||[]).filter(p=>p&&p.id).map(p=>[p.id,p]));
-   const me=Array.from(onlinePlayers.values()).find(p=>p.username===username);
-   if(me)onlineSocketId=me.id;
+   // Keep the server-issued socket ID. Matching by username breaks when both friends use "Driver".
    updateOnlineHud();launchOnlineRunWhenReady();
   }else if(packet.event==='race:state'){
    if(data&&data.id)onlinePlayers.set(data.id,data);
