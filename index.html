@@ -2008,4 +2008,29 @@ initRoadAuth();
  document.addEventListener('DOMContentLoaded',sync);sync();
 })();
 </script>
+<script id="road-rush-quit-recovery">
+(()=> {
+ function forceReturnHome(){
+  try{if(typeof window.quitGame==='function')window.quitGame()}catch(e){console.warn('Quit recovery:',e)}
+  const view=document.getElementById('gameview'),app=document.getElementById('app');
+  if(view){view.classList.remove('active','clean-hud');view.style.display='none';view.setAttribute('aria-hidden','true')}
+  if(app){app.style.display='';app.style.visibility='visible'}
+  for(const id of ['pauseOverlay','crashOverlay']){const el=document.getElementById(id);if(el){el.classList.add('hidden');el.style.display='none'}}
+  const canvas=document.getElementById('road3dCanvas');if(canvas)canvas.style.display='none';
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  const home=document.getElementById('home');if(home)home.classList.add('active');
+  document.body.style.overflow='';
+  try{if(typeof updateHome==='function')updateHome()}catch(e){}
+  try{if(typeof showScreen==='function')showScreen('home')}catch(e){}
+  if(view){view.classList.remove('active');view.style.display='none';view.setAttribute('aria-hidden','true')}
+  if(app)app.style.display='';
+ }
+ document.addEventListener('click',function(e){
+  const btn=e.target&&e.target.closest&&e.target.closest('#quitBtn,#crashQuitBtn');
+  if(!btn)return;
+  e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+  forceReturnHome();
+ },true);
+})();
+</script>
 </body></html>
