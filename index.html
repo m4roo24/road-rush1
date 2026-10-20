@@ -1380,7 +1380,20 @@ window.connectOnlineRace=function(){
    // Keep the server-issued socket ID. Matching by username breaks when both friends use "Driver".
    updateOnlineHud();launchOnlineRunWhenReady();
   }else if(packet.event==='race:state'){
-   if(data&&data.id)onlinePlayers.set(data.id,data);
+   // Accept the server's state packet in either flat or wrapped form. Some Worker
+   // versions send playerId/state, while others send id plus the fields directly.
+   const state=data.player||data.state||data;
+   const stateId=String(state.id||state.playerId||data.id||data.playerId||'');
+   if(stateId){
+    const previous=onlinePlayers.get(stateId)||{};
+    onlinePlayers.set(stateId,{...previous,...state,id:stateId,
+     lane:Number.isFinite(Number(state.lane))?Number(state.lane):Number(previous.lane)||0,
+     km:Number.isFinite(Number(state.km))?Number(state.km):Number(previous.km)||0,
+     speed:Number.isFinite(Number(state.speed))?Number(state.speed):Number(previous.speed)||0,
+     color:state.color||previous.color||'#42d9ff',
+     username:state.username||previous.username||'Driver'
+    });
+   }
    updateOnlineHud();
   }else if(packet.event==='race:start'){
    onlineMatchStarted=true;raceStatus('RACE STARTED! First to crash loses. Winner earns a fixed 100-coin bonus.');
@@ -1414,7 +1427,9 @@ function gameviewActive(){return $('gameview')?.classList.contains('active')}
 function sendOnlineState(){
  if(!onlineConnected()||!onlineRoom||!gameviewActive())return;
  const now=performance.now();if(now-onlineLastSent<100)return;onlineLastSent=now;
- sendOnlinePacket('race:update',{lane:game.lane,km:Math.max(0,Math.min(100000,game.km)),speed:Math.max(0,Math.min(500,game.speed)),running:!!game.running,lost:!!game.dead,color:currentVehicle()?.color||'#42d9ff'});
+ // Include the server-issued ID so the Durable Object can associate every update
+ // with the correct driver even when both players use the same display name.
+ sendOnlinePacket('race:update',{id:onlineSocketId,playerId:onlineSocketId,username:(save.driver||'Driver').slice(0,18),lane:Number(game.lane)||0,km:Math.max(0,Math.min(100000,Number(game.km)||0)),speed:Math.max(0,Math.min(500,Number(game.speed)||0)),running:!!game.running,lost:!!game.dead,color:currentVehicle()?.color||'#42d9ff'});
 }
 setInterval(()=>{if(onlineConnected()&&onlineRoom&&gameviewActive())sendOnlineState()},100);
 const previousStartRun=startRun;startRun=function(){previousStartRun();if(onlineConnected()&&onlineRoom){$('onlineRaceHud').style.display='block';updateOnlineHud()}};window.startRun=startRun;
