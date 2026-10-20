@@ -876,9 +876,10 @@ function roadCurve(y){
  return Math.sin(p*3.25+game.elapsed*.105+Number(save.selectedMap||0)*.58)*amp*(.2+.8*p);
 }
 function drawRoadBand(x1,x2,color){
- ctx.fillStyle=color;ctx.beginPath();
- for(let y=0;y<=H;y+=12){const yy=Math.min(H,y);ctx.lineTo(x1+roadCurve(yy),yy)}
- for(let y=H;y>=0;y-=12)ctx.lineTo(x2+roadCurve(y),y);
+ ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x1+roadCurve(0),0);
+ for(let y=12;y<=H;y+=12){const yy=Math.min(H,y);ctx.lineTo(x1+roadCurve(yy),yy)}
+ ctx.lineTo(x2+roadCurve(H),H);
+ for(let y=H-12;y>=0;y-=12)ctx.lineTo(x2+roadCurve(y),y);
  ctx.closePath();ctx.fill();
 }
 function currentMultiplier(){const m=maps[save.selectedMap]||maps[0],match=m.detail.match(/x([0-9.]+) cash/i);return match?Number(match[1]):1}
