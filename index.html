@@ -672,6 +672,110 @@ input,textarea,select{background:#09131f!important;color:#f3f8ff!important;borde
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
+<style id="road-rush-premium-redesign">
+/* Premium UI overhaul — visual-only; preserves existing game logic and saved progress. */
+:root{--bg:#07090d;--panel:#10141b;--panel2:#151b24;--line:#27313c;--ink:#05070a;--white:#f3f6fa;--muted:#8c9aaa;--yellow:#d7ff38;--green:#b7ff5a;--blue:#5edcff;--pink:#ff658b;--orange:#ffad62;--purple:#b9a0ff;--teal:#53ead6}
+*{box-sizing:border-box}
+html,body{background:#07090d!important;color:var(--white)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif!important}
+body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),linear-gradient(160deg,#080b10,#07090d 60%,#0d1118)!important}
+.app{width:min(100%,1240px)!important;max-width:1240px!important;min-height:100vh;margin:0 auto!important;padding:clamp(16px,3.2vw,38px)!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.screen{color:var(--white)}
+#home{display:none}#home.active{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:stretch;gap:14px}
+.brandrow{grid-column:1/-1;margin:0 0 2px!important;padding:0 0 18px!important;border-bottom:1px solid #ffffff14!important}
+.smallbrand img.brand-logo{width:48px;height:48px;filter:drop-shadow(0 0 20px #d7ff3840)}
+.save{max-width:65%;font-size:12px!important;letter-spacing:.02em;text-decoration:none!important;color:#d7ff8c!important;background:#a4d53b0e!important;border:1px solid #d7ff383c!important;border-radius:999px!important;padding:11px 15px!important}
+.hero-title{grid-column:1/-1;justify-content:flex-start!important;margin:8px 0 0!important;font-family:Impact,'Arial Narrow',sans-serif!important;font-style:italic;font-size:clamp(54px,9vw,104px)!important;line-height:.9!important;letter-spacing:-.045em!important;text-shadow:none!important}
+.hero-title .roadword{color:#f6f8fa!important}.hero-title .runword{color:#07090d!important;background:var(--yellow)!important;border:0!important;border-radius:4px!important;padding:5px 15px 9px!important;box-shadow:none!important;transform:skewX(-8deg)}
+.subtitle{grid-column:1/-1;color:#8494a6!important;font-family:inherit!important;font-size:11px!important;font-weight:800;letter-spacing:.24em!important;margin:0 0 10px!important}
+.vehicle-card{grid-column:span 7;grid-row:span 4;align-self:stretch;display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#263848,#10161e 68%)!important;border:1px solid #ffffff18!important;border-radius:24px!important;padding:clamp(18px,3vw,32px)!important;box-shadow:inset 0 1px #ffffff0a,0 24px 60px #0005!important;margin:0!important;position:relative}
+.vehicle-card:before{content:"FEATURED RIDE / 01";position:absolute;top:20px;left:24px;color:#9bacbd;font-size:10px;letter-spacing:.2em;font-weight:900}
+.truckstage{height:clamp(140px,22vw,245px)!important;margin:16px 0 12px!important;display:grid;place-items:center;position:relative}
+.truckstage:after{content:"";position:absolute;z-index:0;width:75%;height:18px;bottom:14px;background:#d7ff3820;filter:blur(18px);border-radius:50%}
+.truckstage svg{width:100%;max-width:560px;position:relative;z-index:1;filter:drop-shadow(0 22px 12px #0008);transform:scale(1.06)}
+.veh-meta{font-size:10px!important;font-weight:900;letter-spacing:.2em;color:#9eafbe!important}
+.veh-name-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0!important}
+.veh-name{font-size:clamp(32px,5vw,54px)!important;font-weight:950;letter-spacing:-.055em;color:#fff!important}
+.cash{font-size:clamp(18px,3vw,26px)!important;font-weight:900;color:var(--green)!important}
+.pills{display:flex;flex-wrap:wrap;gap:7px!important}.pill{background:#ffffff09!important;border:1px solid #ffffff17!important;border-radius:999px!important;padding:7px 11px!important;font-size:11px!important;color:#c3ced9!important}.pill.green{background:#d7ff3814!important;color:#d7ff7b!important;border-color:#d7ff383d!important}
+.banner{grid-column:span 5;min-width:0;align-self:stretch;display:flex;gap:13px;min-height:90px!important;margin:0!important;padding:18px!important;border:1px solid #ffffff18!important;border-radius:18px!important;box-shadow:none!important;background:#121821!important;color:#f5f7fa!important;transition:border-color .2s,transform .2s}
+.banner .bi{width:42px;flex-basis:42px;font-size:26px!important;filter:none!important}
+.banner b{font-family:inherit!important;font-size:15px!important;font-weight:850!important;line-height:1.25!important}
+.banner small{font-size:11px!important;color:#9daaba!important;line-height:1.5!important}
+.gift{background:linear-gradient(120deg,#1a2415,#111820)!important;border-color:#b8ff5a40!important}.gift .bi{color:var(--green)}
+.challenge{background:linear-gradient(120deg,#1b1a2a,#131820)!important;border-color:#b9a0ff3b!important}.challenge .bi{color:var(--purple)}
+.bigbtn{min-height:64px!important;border:1px solid #ffffff24!important;border-radius:14px!important;box-shadow:none!important;font-family:inherit!important;font-size:15px!important;font-weight:950!important;letter-spacing:.07em;text-transform:uppercase;transition:transform .16s,filter .16s,background .16s!important}
+.bigbtn:active,.navbtn:active,.tab:active,.smallbtn:active{transform:scale(.985)!important;box-shadow:none!important}
+.bigbtn.yellow{grid-column:span 5;background:var(--yellow)!important;color:#11160a!important;border-color:var(--yellow)!important}
+.bigbtn.gold{grid-column:span 5;background:#151b22!important;color:#d7ff70!important;border-color:#d7ff3830!important;margin-top:0!important;font-size:15px!important}
+.navgrid{grid-column:1/-1;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important;margin:16px 0!important}
+.navbtn{min-width:0;min-height:104px!important;display:flex;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important;gap:12px!important;padding:15px!important;border:1px solid #ffffff14!important;border-radius:16px!important;box-shadow:none!important;background:linear-gradient(145deg,#171e27,#10151c)!important;color:#f2f5f8!important;font-family:inherit!important;font-size:13px!important;font-weight:850!important;transition:transform .18s,border-color .18s,background .18s!important}
+.navbtn:hover{border-color:#d7ff3866!important;background:#1a232b!important;transform:translateY(-2px)}
+.navbtn .navicon{width:36px!important;height:36px!important;flex-basis:36px!important;border-radius:11px!important;display:grid;place-items:center;background:#d7ff3813!important;box-shadow:none!important;font-size:20px!important}
+.navbtn .navtxt{font-size:13px!important;line-height:1.2}.navbtn .count{font-size:9px!important;border-radius:5px!important;background:#ffffff0d!important;color:#d7ff77!important;padding:4px 6px!important}
+.navbtn.wide{grid-column:span 2;min-height:84px!important;flex-direction:row!important;align-items:center!important}
+.statsrow{grid-column:1/-1;gap:10px!important;margin:8px 0 12px!important}
+.statbox{min-width:0;background:#10161d!important;border:1px solid #ffffff14!important;border-radius:14px!important;box-shadow:none!important;min-height:82px!important;padding:15px!important}
+.statbox b{font-family:inherit!important;font-size:clamp(18px,3vw,27px)!important;letter-spacing:-.04em}
+.statbox small{font-size:9px!important;letter-spacing:.14em!important;color:#8594a4!important}
+.footerlinks{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px!important;align-items:center;border-top:1px solid #ffffff12;color:#7d8b99!important;padding-top:18px!important;font-size:11px!important}
+.footerlinks button{color:#c6d1dc!important;font-size:11px}
+.screenhead{grid-template-columns:auto 1fr auto!important;gap:14px!important;margin:4px 0 24px!important;padding:0 0 18px;border-bottom:1px solid #ffffff14}
+.screenhead h1{font-family:inherit!important;font-size:clamp(27px,5vw,42px)!important;letter-spacing:-.05em;text-align:left!important;text-shadow:none!important;font-weight:950}
+.balance{font-family:inherit!important;font-size:19px!important;font-weight:900;color:var(--green)!important}
+.backbtn{border:1px solid #ffffff1c!important;background:#151b23!important;color:#e8edf2!important;border-radius:10px!important;box-shadow:none!important;font-family:inherit!important;font-size:12px!important;font-weight:800;padding:11px 13px!important}
+.mutednote,.setting-note{color:#8d9bab!important;font-size:12px!important;line-height:1.7}
+.tabs{gap:8px!important;margin-bottom:14px!important}.tab{min-height:42px!important;border:1px solid #ffffff18!important;border-radius:10px!important;background:#131922!important;color:#aab6c3!important;box-shadow:none!important;font-family:inherit!important;font-size:12px!important;padding:10px 14px!important}.tab.selected{background:#d7ff38!important;color:#0a0e08!important;border-color:#d7ff38!important}
+.maplist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+.mapcard{grid-template-columns:92px minmax(0,1fr)!important;gap:13px!important;align-items:center!important;min-width:0;position:relative;min-height:132px!important;padding:12px!important;border:1px solid #ffffff18!important;border-radius:16px!important;background:linear-gradient(145deg,#171e27,#10151c)!important;box-shadow:none!important}
+.mapcard.selected{border-color:#d7ff38!important;box-shadow:inset 0 0 0 1px #d7ff3833!important;background:linear-gradient(145deg,#1c261d,#111820)!important}
+.mapart{width:92px!important;height:104px!important;border:1px solid #ffffff18!important;border-radius:11px!important;background:#1d2b34!important}
+.mapcopy{min-width:0}.country{font-size:9px!important;letter-spacing:.14em!important;color:#d7ff71!important;font-weight:900}.mapname{font-family:inherit!important;font-size:15px!important;font-weight:900;letter-spacing:-.025em;line-height:1.2!important;margin:4px 0 6px!important}.mapdesc{font-size:10px!important;color:#9aa8b6!important;line-height:1.5!important}
+.buybtn{grid-column:2;justify-self:start;min-width:0!important;padding:8px 12px!important;border:1px solid #ffffff1d!important;border-radius:9px!important;background:#d7ff38!important;color:#0b1008!important;box-shadow:none!important;font-family:inherit!important;font-size:11px!important;font-weight:900}
+.garage-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important}
+.garagecar{grid-template-columns:64px minmax(0,1fr) auto!important;gap:10px!important;padding:12px!important;border:1px solid #ffffff18!important;border-radius:16px!important;background:linear-gradient(145deg,#171e27,#10151c)!important;box-shadow:none!important;min-width:0}
+.garagecar.active{border-color:#d7ff38!important;box-shadow:inset 0 0 0 1px #d7ff3824!important}
+.garage-art{height:62px!important;border:1px solid #ffffff18!important;border-radius:12px!important;background:#ffffff08!important;font-size:34px!important;filter:none!important}
+.sectionlabel{font-size:10px!important;letter-spacing:.2em!important;color:#d7ff71!important;text-transform:uppercase;font-weight:900;margin:24px 0 10px!important}
+.optionrow{border-bottom:1px solid #ffffff12!important;padding:14px 0!important;font-size:13px!important;color:#e4e9ef}
+.choicegroup{gap:8px!important}.choicegroup button,.toggle{border:1px solid #ffffff1c!important;border-radius:9px!important;background:#151b23!important;color:#c4ced8!important;box-shadow:none!important;padding:10px 13px!important;font-family:inherit!important;font-size:12px!important}.choicegroup button.selected,.toggle.on{background:#d7ff3819!important;color:#dcff89!important;border-color:#d7ff3866!important}
+.slider{accent-color:#d7ff38}
+.gameview{background:#070a0f!important}
+.gamehud .hudmain{background:#0b111be8!important;border:1px solid #ffffff25!important;border-radius:17px!important;box-shadow:0 12px 30px #0005!important;backdrop-filter:blur(18px);padding:12px 15px!important}
+.hudmoney{font-family:inherit!important;font-size:clamp(24px,5vw,36px)!important;font-weight:950}
+.hudsub{font-size:11px!important;color:#a7b5c4!important}
+.fuel{border:1px solid #ffffff25!important;background:#ffffff12!important}.pausebtn{width:58px!important;height:58px!important;border:1px solid #ffffff2c!important;border-radius:16px!important;background:#111924e8!important;color:#fff!important;box-shadow:none!important;font-family:inherit!important}
+.hud-toggle-btn{border:1px solid #ffffff26!important;border-radius:999px!important;background:#101721e8!important;color:#e8f3ff!important;box-shadow:none!important;font:800 11px system-ui!important;backdrop-filter:blur(14px)}
+.gameoverlay{backdrop-filter:blur(12px);background:#03060bbd!important}
+.overlaypanel{background:linear-gradient(145deg,#171f2a,#0d1219)!important;border:1px solid #ffffff20!important;border-radius:22px!important;box-shadow:0 25px 90px #0009!important}
+.overlaypanel h2{font-family:inherit!important;font-weight:950!important;letter-spacing:-.04em}
+.overlaypanel .bigbtn,.overlaypanel .action{border-radius:11px!important;box-shadow:none!important;font-family:inherit!important}
+@media(min-width:1000px){.maplist{grid-template-columns:repeat(3,minmax(0,1fr))!important}.garage-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:760px){
+ .app{padding:16px!important}
+ #home.active{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+ .brandrow,.hero-title,.subtitle,.vehicle-card,.navgrid,.statsrow,.footerlinks{grid-column:1/-1!important}
+ .hero-title{font-size:clamp(54px,15vw,82px)!important}
+ .vehicle-card{grid-row:auto!important;min-height:290px}
+ .truckstage{height:155px!important}
+ .banner{grid-column:span 1;min-height:104px!important;flex-direction:column;align-items:flex-start;justify-content:center;padding:13px!important;gap:6px!important}
+ .banner .bi{font-size:22px!important;width:auto;flex-basis:auto}
+ .banner b{font-size:12px!important}.banner small{font-size:10px!important}
+ .bigbtn.yellow,.bigbtn.gold{grid-column:span 1!important;min-height:58px!important;padding:10px!important;font-size:12px!important}
+ .navgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin:8px 0!important}
+ .navbtn{min-height:84px!important;padding:12px!important;flex-direction:row!important;align-items:center!important;gap:10px!important}
+ .navbtn .navicon{width:34px!important;height:34px!important;flex-basis:34px!important;font-size:18px!important}
+ .navbtn.wide{grid-column:span 2!important;min-height:66px!important}
+ .statsrow{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .screenhead{grid-template-columns:auto 1fr auto!important;gap:8px!important}
+ .screenhead h1{font-size:24px!important}.balance{font-size:14px!important}
+ .maplist,.garage-list{grid-template-columns:1fr!important}
+ .mapcard{grid-template-columns:84px minmax(0,1fr)!important;min-height:120px!important}
+ .mapart{width:84px!important;height:94px!important}
+ .garagecar{grid-template-columns:58px minmax(0,1fr) auto!important}
+}
+@media(max-width:390px){.app{padding:12px!important}.save{font-size:10px!important;padding:9px!important}.veh-name{font-size:30px!important}.pill{font-size:9px!important}.navbtn{padding:9px!important}.navbtn .navtxt{font-size:11px!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
 <main class="app" id="app">
