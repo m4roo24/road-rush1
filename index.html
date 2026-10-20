@@ -615,7 +615,7 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
 </section>
 <section id="info" class="screen"><div class="screenhead"><button class="backbtn" id="infoBackBtn" type="button">‹ Back</button><h1 id="infoTitle">Information</h1><div class="balance" id="infoCash">$0</div></div><div class="modalinfo"><div class="infoicon" id="infoIcon">ℹ️</div><p id="infoText" class="setting-note" style="font-size:19px;text-align:center"></p><button class="bigbtn yellow" id="infoOkBtn" type="button">OK</button></div></section>
 <section id="jobs" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Jobs</h1><div class="balance" id="jobsCash">$0</div></div><p class="mutednote">Complete driving goals to earn bonus cash. Progress is saved with your profile.</p><div id="jobsList" class="feature-list"></div></section>
-<section id="codes" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Codes</h1><div class="balance" id="codesCash">$0</div></div><p class="mutednote">Redeem a game code. Each code can only be used once per profile.</p><div class="code-panel"><label for="promoCode">PROMO CODE</label><input id="promoCode" type="text" maxlength="24" autocomplete="off" placeholder="ENTER CODE"><button class="bigbtn yellow" onclick="redeemPromoCode()">REDEEM CODE</button><p id="codeMessage" class="setting-note" aria-live="polite"></p></div><div class="feature-card"><b>Hint</b><p>Codes are case-insensitive. Check official game announcements for new rewards.</p></div></section>
+<section id="codes" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Codes</h1><div class="balance" id="codesCash">$0</div></div><p class="mutednote">Special code ROADRUSH1T grants 1T$ to the first signed-in player only; once it is redeemed globally, no other account can use it.</p><div class="code-panel"><label for="promoCode">PROMO CODE</label><input id="promoCode" type="text" maxlength="24" autocomplete="off" placeholder="ENTER CODE"><button class="bigbtn yellow" onclick="redeemPromoCode()">REDEEM CODE</button><p id="codeMessage" class="setting-note" aria-live="polite"></p></div><div class="feature-card"><b>Hint</b><p>Codes are case-insensitive. Check official game announcements for new rewards.</p></div></section>
 <section id="leaderboard" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Leaderboard</h1><div class="balance">🏆</div></div><p class="mutednote" id="leaderboardHint">Global best runs appear here when online saves are connected.</p><div id="leaderboardList" class="feature-list"><div class="feature-card">Sign in and connect to a game server to load the online leaderboard.</div></div><button class="bigbtn yellow" style="width:100%" onclick="loadLeaderboard()">↻ Refresh leaderboard</button></section>
 <section id="achievements" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Achievements</h1><div class="balance" id="achievementTotal">0/8</div></div><p class="mutednote">Milestones unlock as you play. Progress is tracked automatically.</p><div id="achievementList" class="feature-list"></div></section>
 <section id="police" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Police</h1><div class="balance">🚓</div></div><div class="feature-card police-card"><div class="police-hero">🚔</div><h2>Interceptor Pursuit Unit</h2><p>Unlock the police cruiser in the Garage and drive with the highest top speed in the current fleet.</p><div class="pill-row"><span class="pill">212 km/h top speed</span><span class="pill green">Rapid acceleration</span></div><button class="bigbtn yellow" style="width:100%;margin-top:18px" onclick="showScreen('garage')">OPEN GARAGE</button></div></section>
@@ -664,14 +664,13 @@ const $=id=>document.getElementById(id); const money=n=>'$'+Math.floor(n).toLoca
 const todayKey=()=>new Date().toLocaleDateString('en-CA');
 const defaults={cash:0,best:0,runs:0,km:0,jobs:0,prestige:0,day:1,claimed:false,claimDate:'',challengeDate:'',challengeKm:0,challengeDone:false,driver:'Driver',unlocked:[0],selectedMap:0,carsUnlocked:[0],selectedCar:0,pickups:0,longestRunKm:0,jobsClaimed:[],redeemedCodes:[],startingMagnet:false};
 let save={...defaults};
-try{
- const primary=JSON.parse(localStorage.getItem('cargo_run_save')||'null');
- const backup=JSON.parse(localStorage.getItem('cargo_run_save_backup')||'null');
- const valid=x=>!!x&&typeof x==='object'&&!Array.isArray(x)&&Number.isFinite(Number(x.cash))&&Number(x.cash)>=0;
- const score=x=>valid(x)?(Number(x.cash)||0)+(Number(x.best)||0)+(Number(x.runs)||0)*100+(Number(x.km)||0)*10+(Array.isArray(x.unlocked)?x.unlocked.length:0)*1000+(Array.isArray(x.carsUnlocked)?x.carsUnlocked.length:0)*500:-1;
- const restored=score(backup)>score(primary)?backup:primary;
- if(valid(restored))save={...defaults,...restored};
-}catch(e){console.warn('Save recovery failed; keeping defaults',e)}
+const readStoredSave=key=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch(e){console.warn('Ignoring unreadable save',key);return null}};
+const primary=readStoredSave('cargo_run_save');
+const backup=readStoredSave('cargo_run_save_backup');
+const valid=x=>!!x&&typeof x==='object'&&!Array.isArray(x)&&Number.isFinite(Number(x.cash))&&Number(x.cash)>=0;
+const score=x=>valid(x)?(Number(x.cash)||0)+(Number(x.best)||0)+(Number(x.runs)||0)*100+(Number(x.km)||0)*10+(Array.isArray(x.unlocked)?x.unlocked.length:0)*1000+(Array.isArray(x.carsUnlocked)?x.carsUnlocked.length:0)*500:-1;
+const restored=score(backup)>score(primary)?backup:primary;
+if(valid(restored))save={...defaults,...restored};
 save.cash=Math.max(0,Number(save.cash)||0);
 for(const key of ['best','runs','km','jobs','prestige','day','challengeKm','pickups','longestRunKm'])save[key]=Math.max(0,Number(save[key])||0);
 save.unlocked=Array.isArray(save.unlocked)?[...new Set(save.unlocked.map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<20))]:[0];
@@ -742,6 +741,7 @@ function sanitizeIncomingSave(remote){
  return next;
 }
 window.getRoadRushCloudSnapshot=()=>JSON.parse(JSON.stringify(save));
+window.setRoadRushDriverName=function(name){const clean=String(name||'Driver').trim().replace(/[<>]/g,'').slice(0,18)||'Driver';save.driver=clean;persist();updateHome();return clean;};
 window.applyRoadRushCloudSnapshot=function(remote){
  save=sanitizeIncomingSave(remote);
  try{const snapshot=JSON.stringify(save);localStorage.setItem('cargo_run_save',snapshot);localStorage.setItem('cargo_run_save_backup',snapshot)}catch(e){console.warn('Could not cache cloud save',e)}
@@ -1210,6 +1210,8 @@ window.queueRoadRushCloudSave=function(){
 };
 window.roadRedeemSpecialCode=async function(code){
  if(!roadAuth?.currentUser||!roadFunctions)throw new Error("Sign in with Google or verified email first.");
+ if(!roadCloudReady)await roadActivateCloudSave(roadAuth.currentUser);
+ if(!roadCloudReady)throw new Error("Cloud save must connect before using the global one-time reward code.");
  const token=await roadAuth.currentUser.getIdTokenResult();
  if(token.claims.firebase?.sign_in_provider==="password"&&token.claims.emailOtpVerified!==true)throw new Error("Verify the six-digit email code before redeeming this account-only code.");
  const result=await httpsCallable(roadFunctions,"redeemRoadRushCode")({code});
@@ -1347,6 +1349,8 @@ window.roadSaveName = async function() {
   button.disabled = true;
   try {
     await updateProfile(roadAuth.currentUser, { displayName: name });
+    window.roadFirebaseUser = roadAuth.currentUser;
+    if (typeof window.setRoadRushDriverName === "function") window.setRoadRushDriverName(name);
     document.getElementById("roadNameModal").style.display = "none";
     const user = document.getElementById("roadAuthUser");
     if (user) user.textContent = "Driver name: " + name;
