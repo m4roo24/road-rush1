@@ -801,8 +801,8 @@ function drawWorld(dt){
  ctx.clearRect(0,0,W,H);const {left,width,lanew,right}=roadGeom(),map=maps[save.selectedMap]||maps[0];
  // Ground texture moves opposite the car; roadside props are deterministic so they do not flicker.
  ctx.fillStyle=map.ground;ctx.fillRect(0,0,W,H);
- const stripe=(game.roadOffset*.62)%155;
- if(!settings.focus){for(let row=-1;row<Math.ceil(H/155)+2;row++){const y=row*155+stripe;ctx.fillStyle=(row%2===0)?'#ffffff0b':'#1c2b2010';ctx.fillRect(0,y,left,95);ctx.fillRect(right,y,W-right,95);const seed=row*155;
+ const roadsideScroll=game.roadOffset*.62,stripe=roadsideScroll%155,roadsideSegment=Math.floor(roadsideScroll/155);
+ if(!settings.focus){for(let row=-1;row<Math.ceil(H/155)+2;row++){const y=row*155+stripe;ctx.fillStyle=(row%2===0)?'#ffffff0b':'#1c2b2010';ctx.fillRect(0,y,left,95);ctx.fillRect(right,y,W-right,95);const seed=(row+roadsideSegment)*155;
   roadProp(Math.max(14,left*.28),y+31,Math.abs(seed+13),-1);roadProp(Math.min(W-14,right+(W-right)*.68),y+107,Math.abs(seed+76),1);
   if(W>450){ctx.fillStyle='#8b928e';ctx.fillRect(8,y+70,Math.max(14,left*.12),26);ctx.fillStyle='#d6d4c5';ctx.fillRect(8,y+70,Math.max(14,left*.12),4);ctx.fillRect(W-Math.max(20,(W-right)*.22)-8,y+20,Math.max(20,(W-right)*.22),34)}
  }}
