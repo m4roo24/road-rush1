@@ -866,13 +866,7 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
  <p>Fine-tune performance, camera, and the look of your drive.</p>
  <div class="rr-settings-chips"><span>⚡ Quick presets</span><span>🎮 Mobile ready</span><span>💾 Auto-saved</span></div>
 </div>
-<div class="rr-settings-section-title"><span>01 / QUICK SETUP</span><small>Choose your driving style</small></div>
-<div class="rr-preset-grid">
- <button class="rr-preset" onclick="rrApplyPreset('performance')" id="rrPresetPerformance"><span class="rr-preset-icon">⚡</span><b>PERFORMANCE</b><small>For smoother mobile play</small></button>
- <button class="rr-preset" onclick="rrApplyPreset('balanced')" id="rrPresetBalanced"><span class="rr-preset-icon">◈</span><b>BALANCED</b><small>Quality + speed</small></button>
- <button class="rr-preset" onclick="rrApplyPreset('ultra')" id="rrPresetUltra"><span class="rr-preset-icon">✦</span><b>ULTRA VISUALS</b><small>More detail, if supported</small></button>
-</div>
-<div class="rr-settings-section-title"><span>02 / 3D EXPERIENCE</span><small>Personalize your camera and world</small></div>
+<div class="rr-settings-section-title"><span>01 / 3D EXPERIENCE</span><small>Personalize your camera and world</small></div>
 <div class="rr-settings-card">
  <div class="rr-settings-feature"><div class="rr-feature-symbol">🎥</div><div class="rr-feature-copy"><b>Chase camera</b><small>Change how close the camera follows your car.</small></div></div>
  <div class="rr-segmented" id="rrCameraChoices"><button data-rr-camera="close" onclick="rrSetCamera('close')">CLOSE</button><button data-rr-camera="standard" onclick="rrSetCamera('standard')">STANDARD</button><button data-rr-camera="cinematic" onclick="rrSetCamera('cinematic')">CINEMATIC</button></div>
@@ -882,7 +876,7 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
  <div class="rr-settings-divider"></div>
  <div class="rr-settings-feature"><div class="rr-feature-symbol">🧭</div><div class="rr-feature-copy"><b>Speed cockpit</b><small>Show or hide the extra speedometer overlay.</small></div><button class="toggle on" id="rrCockpitToggle" onclick="rrToggleCockpit()" aria-label="Toggle speed cockpit"></button></div>
 </div>
-<div class="rr-settings-section-title"><span>03 / YOUR SETUP</span><small>Saved automatically on this device</small></div>
+<div class="rr-settings-section-title"><span>02 / YOUR SETUP</span><small>Saved automatically on this device</small></div>
 <div class="rr-settings-actions"><button onclick="rrResetPremiumSettings()">↺ RESET CUSTOM OPTIONS</button><span id="rrSettingsStatus">All settings saved locally</span></div>
  <div class="sectionlabel">Sound</div><div class="optionrow"><span>Sound effects</span><button class="toggle on" data-setting="sound" aria-label="Toggle sound effects"></button></div><div class="optionrow"><span>Effects volume</span><input class="slider" type="range" min="0" max="100" value="80" data-setting="effectsVolume"></div><div class="optionrow"><span>Music</span><button class="toggle on" data-setting="music" aria-label="Toggle music"></button></div><div class="optionrow"><span>Music volume</span><input class="slider" type="range" min="0" max="100" value="42" data-setting="musicVolume"></div>
  <div class="sectionlabel">Controls</div><div class="optionrow" style="border:0;padding-bottom:4px"><span>Steering</span></div><div class="choicegroup" id="steeringChoices"><button class="selected" data-control="tap">Tap Sides</button><button data-control="swipe">Swipe</button><button data-control="buttons">Buttons</button></div><p class="setting-note" style="border-bottom:2px dashed #353a57;padding:8px 0 20px">Keyboard: ← → or A D to steer, Esc or P to pause. Game controllers work too.</p>
