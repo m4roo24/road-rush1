@@ -728,7 +728,27 @@ function apiBase(){return (localStorage.getItem('cargo_run_api_url')||'https://r
 function apiRequest(route,options={}){const base=apiBase();const headers={'Content-Type':'application/json',...(options.headers||{})};if(cloudToken)headers.Authorization='Bearer '+cloudToken;return fetch((base||'')+route,{...options,headers,cache:'no-store'}).then(async r=>{let data={};try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data.error||'Server request failed ('+r.status+')');return data})}
 function cloudStatus(text,kind=''){const e=$('accountStatus');if(e){e.textContent=text;e.classList.remove('error','good');if(kind)e.classList.add(kind)}const st=$('saveStatus');if(st)st.textContent=text;const label=$('cloudButtonLabel');const firebaseUser=window.roadFirebaseUser;if(label)label.textContent=cloudToken?'Cloud save: '+(cloudUser||'connected'):firebaseUser?'Signed in: '+(firebaseUser.displayName||firebaseUser.email||'driver'):'Sign in to save online';}
 function queueCloudSave(){clearTimeout(cloudTimer);cloudTimer=setTimeout(async()=>{if(!cloudToken)return;if(cloudSyncBusy){queueCloudSave();return}cloudSyncBusy=true;const snapshot=JSON.stringify(save);let succeeded=false;try{await apiRequest('/api/save',{method:'PUT',body:JSON.stringify({save:JSON.parse(snapshot)})});cloudLastSaved=snapshot;succeeded=true;cloudStatus('Cloud save synced · '+(cloudUser||'connected'),'good')}catch(e){cloudStatus('Cloud sync failed: '+e.message+' · local save kept','error')}finally{cloudSyncBusy=false;if(succeeded&&cloudToken&&JSON.stringify(save)!==snapshot)queueCloudSave()}},900)}
-function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;save={...defaults,...remote};if(!Array.isArray(save.unlocked))save.unlocked=[0];if(!save.unlocked.includes(0))save.unlocked.unshift(0);if(!Array.isArray(save.carsUnlocked))save.carsUnlocked=[0];if(!save.carsUnlocked.includes(0))save.carsUnlocked.unshift(0);if(!Array.isArray(save.jobsClaimed))save.jobsClaimed=[];if(!Array.isArray(save.redeemedCodes))save.redeemedCodes=[];try{localStorage.setItem('cargo_run_save',JSON.stringify(save))}catch(e){}updateHome();renderMaps();renderGarage();renderJobs();renderAchievements();updateAccountUi();}
+function sanitizeIncomingSave(remote){
+ const candidate=remote&&remote.save&&typeof remote.save==='object'?remote.save:remote;
+ if(!candidate||typeof candidate!=='object'||Array.isArray(candidate))throw new Error('Invalid cloud save data.');
+ const next={...defaults,...candidate};
+ next.cash=Math.max(0,Number(next.cash)||0);
+ for(const k of ['best','runs','km','jobs','prestige','day','challengeKm','pickups','longestRunKm'])next[k]=Math.max(0,Number(next[k])||0);
+ next.unlocked=Array.isArray(next.unlocked)?[...new Set(next.unlocked.map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<20))]:[0];if(!next.unlocked.includes(0))next.unlocked.unshift(0);
+ next.carsUnlocked=Array.isArray(next.carsUnlocked)?[...new Set(next.carsUnlocked.map(Number).filter(n=>Number.isInteger(n)&&n>=0&&n<10))]:[0];if(!next.carsUnlocked.includes(0))next.carsUnlocked.unshift(0);
+ next.selectedMap=Number.isInteger(Number(next.selectedMap))?Math.max(0,Math.min(19,Number(next.selectedMap))):0;if(!next.unlocked.includes(next.selectedMap))next.selectedMap=0;
+ next.selectedCar=Number.isInteger(Number(next.selectedCar))?Math.max(0,Math.min(9,Number(next.selectedCar))):0;if(!next.carsUnlocked.includes(next.selectedCar))next.selectedCar=0;
+ if(!Array.isArray(next.jobsClaimed))next.jobsClaimed=[];if(!Array.isArray(next.redeemedCodes))next.redeemedCodes=[];
+ return next;
+}
+window.getRoadRushCloudSnapshot=()=>JSON.parse(JSON.stringify(save));
+window.applyRoadRushCloudSnapshot=function(remote){
+ save=sanitizeIncomingSave(remote);
+ try{const snapshot=JSON.stringify(save);localStorage.setItem('cargo_run_save',snapshot);localStorage.setItem('cargo_run_save_backup',snapshot)}catch(e){console.warn('Could not cache cloud save',e)}
+ updateHome();renderMaps();renderGarage();renderJobs();renderAchievements();updateAccountUi();
+ return true;
+};
+function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;window.applyRoadRushCloudSnapshot(remote)}
 async function loadCloudSave(silent=false){if(!cloudToken)return;try{const r=await apiRequest('/api/save');if(r.save)applyCloudSave(r.save);cloudStatus('Cloud save connected · '+(cloudUser||'player'),'good')}catch(e){cloudStatus((silent?'Cloud sync unavailable: ':'Could not load cloud save: ')+e.message+' · local save kept','error')}}
 function openAccount(){const modal=$('accountModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');updateAccountUi();if(!window.roadFirebaseUser)setTimeout(()=>{if(!window.roadFirebaseUser)$('roadAuthEmail')?.focus()},80)}window.openAccount=openAccount;
 function closeAccount(){const m=$('accountModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}window.closeAccount=closeAccount;
@@ -745,9 +765,9 @@ function updateAccountUi(){
  if(profileName)profileName.textContent=firebaseUser?(firebaseUser.displayName||save.driver||'Driver'):'';
  if(profileEmail)profileEmail.textContent=firebaseUser?(firebaseUser.email||'Google account'):'';
  if(provider)provider.textContent=firebaseUser&&firebaseUser.providerData?.some(p=>p.providerId==='google.com')?'Google':firebaseUser&&firebaseUser.providerData?.some(p=>p.providerId==='password')?'Email and password':'Firebase';
- if(saveState)saveState.textContent=cloudToken?'Cloud save connected':'Saved on this device';
+ if(saveState)saveState.textContent=window.roadCloudSaveState||(cloudToken?'Legacy cloud save connected':firebaseUser?'Connecting cloud save…':'Saved on this device');
  const status=$('saveStatus');
- if(status)status.textContent=cloudToken?'Cloud save connected · '+(cloudUser||'account'):firebaseUser?'Signed in as '+(firebaseUser.displayName||firebaseUser.email)+' · progress is currently saved on this device':'Offline save · This device';
+ if(status)status.textContent=window.roadCloudSaveState||(cloudToken?'Legacy cloud save connected · '+(cloudUser||'account'):firebaseUser?'Signed in as '+(firebaseUser.displayName||firebaseUser.email)+' · syncing progress':'Offline save · This device');
  const label=$('cloudButtonLabel');
  if(label)label.textContent=cloudToken?'Cloud save: '+(cloudUser||'connected'):firebaseUser?(firebaseUser.displayName||firebaseUser.email||'My profile'):'Sign in to save online';
 }
@@ -1138,13 +1158,71 @@ const roadAuthConfigured = () => {
   }
   return true;
 };
+let roadCloudReady=false, roadCloudTimer=null, roadCloudBusy=false;
+function setRoadCloudState(message,error=false){
+ window.roadCloudSaveState=message;
+ const state=document.getElementById("roadProfileSaveState");if(state){state.textContent=message;state.style.color=error?"#ff8b9b":"#65e9be"}
+ const saveStatus=document.getElementById("saveStatus");if(saveStatus)saveStatus.textContent=message;
+ if(typeof window.updateAccountUi==="function")window.updateAccountUi();
+}
+async function roadActivateCloudSave(user){
+ if(!user||!roadFunctions)return;
+ roadCloudReady=false;
+ try{
+  const token=await user.getIdTokenResult();
+  const provider=token.claims.firebase?.sign_in_provider||"";
+  if(provider==="password"&&token.claims.emailOtpVerified!==true){
+   setRoadCloudState("Verify your six-digit email code to enable secure cloud saves.",false);
+   return;
+  }
+  setRoadCloudState("Restoring account progress…");
+  const call=httpsCallable(roadFunctions,"savePlayerProgress");
+  const response=await call({action:"load"});
+  const data=response.data||{};
+  if(data.save&&typeof window.applyRoadRushCloudSnapshot==="function"){
+   window.applyRoadRushCloudSnapshot(data.save);
+  }else if(typeof window.getRoadRushCloudSnapshot==="function"){
+   await call({action:"save",save:window.getRoadRushCloudSnapshot()});
+  }
+  roadCloudReady=true;
+  setRoadCloudState("Cloud saved · cash, cars, maps, settings and progress are synced.");
+ }catch(error){
+  roadCloudReady=false;
+  setRoadCloudState("Cloud save unavailable: "+(error.message||"check Firebase Functions deployment"),true);
+  roadAuthStatus("You are signed in, but cloud sync failed: "+(error.message||"unknown error"),true);
+ }
+}
+window.roadActivateCloudSave=roadActivateCloudSave;
+window.queueRoadRushCloudSave=function(){
+ if(!roadCloudReady||!roadAuth?.currentUser||!roadFunctions)return;
+ clearTimeout(roadCloudTimer);
+ roadCloudTimer=setTimeout(async()=>{
+  if(roadCloudBusy||!roadCloudReady||!roadAuth?.currentUser)return;
+  roadCloudBusy=true;
+  const uid=roadAuth.currentUser.uid, snapshot=window.getRoadRushCloudSnapshot?.();
+  if(!snapshot){roadCloudBusy=false;return}
+  try{
+   await httpsCallable(roadFunctions,"savePlayerProgress")({action:"save",save:snapshot});
+   if(roadAuth?.currentUser?.uid===uid)setRoadCloudState("Cloud saved · cash, cars, maps, settings and progress are synced.");
+  }catch(error){setRoadCloudState("Cloud sync failed · local progress is safe on this device.",true);console.warn("Road Rush cloud save failed",error)}
+  finally{roadCloudBusy=false;if(roadCloudReady&&roadAuth?.currentUser?.uid===uid&&JSON.stringify(snapshot)!==JSON.stringify(window.getRoadRushCloudSnapshot?.()))window.queueRoadRushCloudSave()}
+ },850)
+};
+window.roadRedeemSpecialCode=async function(code){
+ if(!roadAuth?.currentUser||!roadFunctions)throw new Error("Sign in with Google or verified email first.");
+ const token=await roadAuth.currentUser.getIdTokenResult();
+ if(token.claims.firebase?.sign_in_provider==="password"&&token.claims.emailOtpVerified!==true)throw new Error("Verify the six-digit email code before redeeming this account-only code.");
+ const result=await httpsCallable(roadFunctions,"redeemRoadRushCode")({code});
+ if(!result.data?.ok||!result.data?.save)throw new Error("The reward service returned an invalid response.");
+ return result.data;
+};
 function initRoadAuth() {
   if (!roadAuthConfigured()) return false;
   try {
     const app = initializeApp(firebaseConfig);
     roadAuth = getAuth(app);
     roadFunctions = getFunctions(app, "us-central1");
-    onAuthStateChanged(roadAuth, user => {
+    onAuthStateChanged(roadAuth, async user => {
       window.roadFirebaseUser = user || null;
       if (typeof window.updateAccountUi === "function") window.updateAccountUi();
       const label = document.getElementById("roadAuthUser");
@@ -1156,6 +1234,8 @@ function initRoadAuth() {
       // Run the profile switch after all user/session labels have been refreshed.
       if (typeof window.updateAccountUi === "function") window.updateAccountUi();
       if (typeof window.updateHome === "function") window.updateHome();
+      if(user) await roadActivateCloudSave(user);
+      else {roadCloudReady=false;setRoadCloudState("Saved on this device · sign in to sync across devices");}
     });
     return true;
   } catch (error) {
@@ -1220,6 +1300,7 @@ window.roadVerifyOtp = async function() {
     const verifyEmailOtp = httpsCallable(roadFunctions, "verifyEmailOtp");
     await verifyEmailOtp({ code });
     await getIdToken(roadAuth.currentUser, true);
+    await roadActivateCloudSave(roadAuth.currentUser);
     roadOtpPending = false;
     document.getElementById("roadOtpArea").style.display = "none";
     roadAuthStatus("Welcome, " + (roadAuth.currentUser.displayName || roadAuth.currentUser.email) + "! Your email code is verified.");
@@ -1279,6 +1360,8 @@ window.roadSaveName = async function() {
 };
 window.roadFirebaseSignOut = async function() {
   if (roadAuth) await signOut(roadAuth);
+  roadCloudReady = false;
+  setRoadCloudState("Signed out · progress remains saved on this device");
   roadOtpPending = false;
   roadAuthStatus("Signed out of Firebase.");
   if (typeof window.updateAccountUi === "function") window.updateAccountUi();
