@@ -784,6 +784,52 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
 #gameview{isolation:isolate}
 #gameview:not(.road3d-ready) #roadCanvas{visibility:visible!important}
 </style>
+<style id="road-rush-settings-premium-v2">
+#settings.screen{padding-bottom:calc(36px + env(safe-area-inset-bottom))}
+#settings .screenhead{position:sticky;top:0;z-index:8;margin:0 -2px 18px;padding:12px 2px 14px;background:linear-gradient(180deg,#0b1019f5,#0b1019dc);backdrop-filter:blur(18px);border-bottom:1px solid #b8ff3820}
+.rr-settings-hero{position:relative;overflow:hidden;padding:22px 20px 20px;margin:0 0 22px;border:1px solid #c8ff383d;border-radius:24px;background:radial-gradient(ellipse at 95% 0%,#b9f83c20,transparent 48%),linear-gradient(135deg,#18232a,#10151d 65%,#172018);box-shadow:0 14px 38px #0003}
+.rr-settings-hero:after{content:"RR";position:absolute;right:9px;bottom:-33px;font:1000 104px/1 system-ui;color:#d3ff4710;letter-spacing:-10px;pointer-events:none}
+.rr-settings-kicker{display:flex;align-items:center;gap:8px;color:#d2ff72;font:850 10px/1.4 system-ui;letter-spacing:2px}
+.rr-live-dot{width:7px;height:7px;border-radius:50%;background:#c8ff38;box-shadow:0 0 12px #c8ff38}
+.rr-settings-hero h2{position:relative;z-index:1;margin:13px 0 6px;color:#f7f9fc;font:950 clamp(26px,7vw,38px)/1.02 system-ui;letter-spacing:-1.8px}
+.rr-settings-hero h2 span{color:#c8ff38}
+.rr-settings-hero p{position:relative;z-index:1;margin:0;max-width:360px;color:#a8b5c3;font:500 13px/1.55 system-ui}
+.rr-settings-chips{position:relative;z-index:1;display:flex;gap:7px;flex-wrap:wrap;margin-top:17px}
+.rr-settings-chips span{padding:7px 9px;border:1px solid #ffffff14;border-radius:999px;background:#ffffff08;color:#cbd5df;font:750 10px system-ui}
+.rr-settings-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:23px 2px 11px}
+.rr-settings-section-title span{color:#c8ff38;font:900 10px system-ui;letter-spacing:1.5px}
+.rr-settings-section-title small{color:#7f8b9a;text-align:right;font:600 10px system-ui}
+.rr-preset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.rr-preset{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:13px 10px;border:1px solid #27313a;border-radius:17px;background:linear-gradient(150deg,#19212a,#11161d);color:#f4f7fa;text-align:left;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.rr-preset:active{transform:scale(.97)}
+.rr-preset.active{border-color:#c8ff38;background:linear-gradient(150deg,#293522,#131a17);box-shadow:inset 0 0 0 1px #c8ff3820}
+.rr-preset-icon{display:grid;place-items:center;width:31px;height:31px;border-radius:10px;background:#c8ff3815;color:#c8ff38;font-size:18px}
+.rr-preset b{font:900 9px system-ui;letter-spacing:.4px;line-height:1.3}
+.rr-preset small{color:#8c9aa8;font:500 10px/1.4 system-ui}
+.rr-settings-card{padding:6px 15px;border:1px solid #29313b;border-radius:20px;background:linear-gradient(145deg,#161d25,#10151c);box-shadow:0 10px 30px #0002}
+.rr-settings-feature{display:flex;align-items:center;gap:11px;padding:14px 0}
+.rr-feature-symbol{flex:0 0 38px;display:grid;place-items:center;width:38px;height:38px;border-radius:13px;background:#c8ff3812;font-size:18px}
+.rr-feature-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.rr-feature-copy b{color:#f0f4f8;font:850 13px system-ui}
+.rr-feature-copy small{color:#8e9ba8;font:500 11px/1.45 system-ui}
+.rr-settings-divider{height:1px;background:linear-gradient(90deg,#c8ff3833,#ffffff08);margin:0}
+.rr-segmented{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 0 14px}
+.rr-segmented button{padding:10px 3px;border:1px solid #323c45;border-radius:10px;background:#0d1218;color:#9eabb7;font:850 9px system-ui;letter-spacing:.5px;cursor:pointer}
+.rr-segmented button.selected{border-color:#c8ff38;background:#c8ff3817;color:#d9ff8c}
+.rr-settings-actions{display:flex;flex-direction:column;gap:10px;padding:15px;border:1px solid #27313a;border-radius:17px;background:#131920}
+.rr-settings-actions button{padding:12px;border:1px solid #49535d;border-radius:12px;background:#1b232b;color:#d9e2e9;font:850 11px system-ui;letter-spacing:.6px}
+#rrSettingsStatus{color:#8b9aa8;font:500 11px system-ui;text-align:center}
+#settings .sectionlabel{margin-top:25px;color:#c8ff38;font-size:10px;letter-spacing:1.8px}
+#settings .optionrow{border-color:#ffffff0d;padding:13px 2px;gap:12px}
+#settings .optionrow>span,#settings .optionrow>div>div:first-child{color:#e0e7ee;font-size:13px}
+#settings .choicegroup{gap:7px}
+#settings .choicegroup button{border:1px solid #303a43;border-radius:11px;background:#151b22;color:#a8b4bf;box-shadow:none}
+#settings .choicegroup button.selected{border-color:#c8ff38;background:#c8ff3815;color:#dcff9c}
+#settings .toggle{flex-shrink:0;border-color:#48525c;background:#242d36;box-shadow:none}
+#settings .toggle.on{background:#c8ff38;border-color:#c8ff38}
+#settings .slider{accent-color:#c8ff38}
+@media(max-width:380px){.rr-preset-grid{gap:6px}.rr-preset{padding:11px 7px}.rr-preset b{font-size:8px}.rr-preset small{font-size:9px}.rr-settings-section-title small{max-width:46%}}
+</style>
 </head>
 <body>
 <main class="app" id="app">
@@ -814,6 +860,30 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
 <section id="maps" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Maps</h1><div class="balance" id="mapCash">$0</div></div><div class="tabs" id="mapTabs"><button class="tab selected" data-tier="0">Easy <small id="count0">1/5</small></button><button class="tab" data-tier="1">Medium <small id="count1">0/5</small></button><button class="tab" data-tier="2">Hard <small id="count2">0/5</small></button><button class="tab" data-tier="3">Extreme <small id="count3">0/5</small></button></div><p class="mutednote" id="mapNote">1 of 20 maps unlocked. Tougher maps pay more cash.</p><div class="maplist" id="mapList"></div></section>
 <section id="garage" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Garage</h1><div class="balance" id="garageCash">$0</div></div><p class="mutednote">Choose your ride. Different vehicles trade acceleration for top speed.</p><div class="garage-list" id="garageList"></div><div class="setting-note" style="text-align:center;padding:8px 0 20px">Unlocked vehicles, your selected ride, and purchased maps are saved locally and sync to your signed-in account.</div></section>
 <section id="settings" class="screen"><div class="screenhead"><button class="backbtn" onclick="showScreen('home')">‹ Back</button><h1>Settings</h1><div class="balance" id="settingsCash">$300</div></div>
+ <div class="rr-settings-hero">
+ <div class="rr-settings-kicker"><span class="rr-live-dot"></span> DRIVER CONTROL CENTER</div>
+ <h2>Make it <span>your race.</span></h2>
+ <p>Fine-tune performance, camera, and the look of your drive.</p>
+ <div class="rr-settings-chips"><span>⚡ Quick presets</span><span>🎮 Mobile ready</span><span>💾 Auto-saved</span></div>
+</div>
+<div class="rr-settings-section-title"><span>01 / QUICK SETUP</span><small>Choose your driving style</small></div>
+<div class="rr-preset-grid">
+ <button class="rr-preset" onclick="rrApplyPreset('performance')" id="rrPresetPerformance"><span class="rr-preset-icon">⚡</span><b>PERFORMANCE</b><small>For smoother mobile play</small></button>
+ <button class="rr-preset" onclick="rrApplyPreset('balanced')" id="rrPresetBalanced"><span class="rr-preset-icon">◈</span><b>BALANCED</b><small>Quality + speed</small></button>
+ <button class="rr-preset" onclick="rrApplyPreset('ultra')" id="rrPresetUltra"><span class="rr-preset-icon">✦</span><b>ULTRA VISUALS</b><small>More detail, if supported</small></button>
+</div>
+<div class="rr-settings-section-title"><span>02 / 3D EXPERIENCE</span><small>Personalize your camera and world</small></div>
+<div class="rr-settings-card">
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🎥</div><div class="rr-feature-copy"><b>Chase camera</b><small>Change how close the camera follows your car.</small></div></div>
+ <div class="rr-segmented" id="rrCameraChoices"><button data-rr-camera="close" onclick="rrSetCamera('close')">CLOSE</button><button data-rr-camera="standard" onclick="rrSetCamera('standard')">STANDARD</button><button data-rr-camera="cinematic" onclick="rrSetCamera('cinematic')">CINEMATIC</button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🌅</div><div class="rr-feature-copy"><b>World atmosphere</b><small>Switch the lighting mood in the 3D drive.</small></div></div>
+ <div class="rr-segmented" id="rrAtmosphereChoices"><button data-rr-atmosphere="day" onclick="rrSetAtmosphere('day')">DAY</button><button data-rr-atmosphere="sunset" onclick="rrSetAtmosphere('sunset')">SUNSET</button><button data-rr-atmosphere="night" onclick="rrSetAtmosphere('night')">NIGHT</button></div>
+ <div class="rr-settings-divider"></div>
+ <div class="rr-settings-feature"><div class="rr-feature-symbol">🧭</div><div class="rr-feature-copy"><b>Speed cockpit</b><small>Show or hide the extra speedometer overlay.</small></div><button class="toggle on" id="rrCockpitToggle" onclick="rrToggleCockpit()" aria-label="Toggle speed cockpit"></button></div>
+</div>
+<div class="rr-settings-section-title"><span>03 / YOUR SETUP</span><small>Saved automatically on this device</small></div>
+<div class="rr-settings-actions"><button onclick="rrResetPremiumSettings()">↺ RESET CUSTOM OPTIONS</button><span id="rrSettingsStatus">All settings saved locally</span></div>
  <div class="sectionlabel">Sound</div><div class="optionrow"><span>Sound effects</span><button class="toggle on" data-setting="sound" aria-label="Toggle sound effects"></button></div><div class="optionrow"><span>Effects volume</span><input class="slider" type="range" min="0" max="100" value="80" data-setting="effectsVolume"></div><div class="optionrow"><span>Music</span><button class="toggle on" data-setting="music" aria-label="Toggle music"></button></div><div class="optionrow"><span>Music volume</span><input class="slider" type="range" min="0" max="100" value="42" data-setting="musicVolume"></div>
  <div class="sectionlabel">Controls</div><div class="optionrow" style="border:0;padding-bottom:4px"><span>Steering</span></div><div class="choicegroup" id="steeringChoices"><button class="selected" data-control="tap">Tap Sides</button><button data-control="swipe">Swipe</button><button data-control="buttons">Buttons</button></div><p class="setting-note" style="border-bottom:2px dashed #353a57;padding:8px 0 20px">Keyboard: ← → or A D to steer, Esc or P to pause. Game controllers work too.</p>
  <div class="sectionlabel">Display</div><div class="optionrow"><div><div>Full screen</div><div class="setting-note">Hide the browser bars while you play</div></div><button class="backbtn" onclick="goFullscreen()">⛶ Go full screen</button></div><div class="optionrow"><span>Focus mode (calmer screen: plain roadside, fewer effects)</span><button class="toggle" data-setting="focus"></button></div><div class="optionrow"><span>Larger text in menus</span><button class="toggle" data-setting="largeText"></button></div><div class="optionrow" style="border:0"><span>Graphics</span></div><div class="choicegroup" id="graphicsChoices"><button data-graphics="Low">Low</button><button data-graphics="Medium">Medium</button><button class="selected" data-graphics="High">High</button><button data-graphics="Ultra">Ultra</button></div><div class="optionrow"><span>Auto graphics (lowers detail if the game stutters)</span><button class="toggle on" data-setting="autoGraphics"></button></div><div class="optionrow"><span>Screen shake</span><button class="toggle on" data-setting="screenShake"></button></div><div class="optionrow"><span>Vibration</span><button class="toggle on" data-setting="vibration"></button></div><div class="optionrow"><span>Show FPS</span><button class="toggle on" data-setting="fps"></button></div><div class="sectionlabel">Driver</div><div class="optionrow" style="display:block"><b id="driverName">Driver</b><div class="setting-note"><span id="saveStatus">Offline save · This device</span></div></div><p class="setting-note"><a href="#" onclick="showInfo('Privacy policy','🔒','Your progress is stored in your browser when offline. When signed in, your game save is also synced to the game server.');return false">Privacy policy</a></p>
@@ -1057,6 +1127,7 @@ function sound(freq=440,dur=.08){if(!settings.sound)return;const a=ensureAudio()
 const canvas=$('roadCanvas'),ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});let W=0,H=0,dpr=1,raf=0,last=0,game={running:false,paused:false,dead:false,lane:1,visualLane:1,speed:31,km:0,cash:0,elapsed:0,traffic:[],items:[],boss:null,bossBullets:[],bossLevel:0,bossNextAt:300,bossWarningFor:0,weaponAmmo:0,roadOffset:0,spawn:0,fuel:100,runNumber:0,shake:0,passiveCash:0,magnetTime:0,boostTime:0,runFinalized:false,fpsEMA:60,graphicsTimer:0,padLeft:false,padRight:false};let laneCount=3;let audioStarted=false;let helpHideTimer=0;
 function resize(){const mobile=matchMedia('(max-width: 760px)').matches;const dprCap=settings.graphics==='Ultra'?(mobile?1.35:1.75):settings.graphics==='High'?(mobile?1.2:1.4):settings.graphics==='Medium'?(mobile?1.05:1.2):1;dpr=Math.min(devicePixelRatio||1,dprCap);W=canvas.clientWidth=innerWidth;H=canvas.clientHeight=innerHeight;canvas.width=Math.max(1,Math.floor(W*dpr));canvas.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
 window.__roadRush3DState=()=>({game,save,settings});
+window.syncSettings=syncSettings;
 function drawCar(x,y,w,h,color,player=false,kind='car',lean=0){
  ctx.save();ctx.translate(x,y);ctx.rotate(lean);if(!player)ctx.rotate(Math.PI);
  const isTruck=kind==='truck',isVan=kind==='van',bodyW=w*(isTruck?.98:isVan?.92:.84),bodyH=h*(isTruck?.98:isVan?.92:.82),r=Math.max(4,w*.16);
@@ -1788,6 +1859,37 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
   }
   requestAnimationFrame(render);
  }catch(err){console.warn('3D renderer unavailable; retaining original canvas game',err);canvas.remove();view.classList.remove('road3d-ready');old.style.visibility='visible'}
+})();
+</script>
+<script id="road-rush-premium-settings-features">
+(()=>{
+ const key='roadRushPremiumPrefs';
+ const defaults={camera:'standard',atmosphere:'day',cockpit:true,preset:'balanced'};
+ const read=()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){return {...defaults}}};
+ let prefs=read();
+ const save=()=>{try{localStorage.setItem(key,JSON.stringify(prefs))}catch(e){};sync();const status=document.getElementById('rrSettingsStatus');if(status)status.textContent='✓ Settings saved on this device'};
+ function sync(){
+  document.querySelectorAll('[data-rr-camera]').forEach(b=>b.classList.toggle('selected',b.dataset.rrCamera===prefs.camera));
+  document.querySelectorAll('[data-rr-atmosphere]').forEach(b=>b.classList.toggle('selected',b.dataset.rrAtmosphere===prefs.atmosphere));
+  document.querySelectorAll('.rr-preset').forEach(b=>b.classList.toggle('active',b.id==='rrPreset'+prefs.preset.charAt(0).toUpperCase()+prefs.preset.slice(1)));
+  const t=document.getElementById('rrCockpitToggle');if(t)t.classList.toggle('on',prefs.cockpit);
+  document.body.classList.toggle('rr-hide-cockpit',!prefs.cockpit);
+ }
+ window.rrSetCamera=v=>{prefs.camera=v;save()};
+ window.rrSetAtmosphere=v=>{prefs.atmosphere=v;save()};
+ window.rrToggleCockpit=()=>{prefs.cockpit=!prefs.cockpit;save()};
+ window.rrApplyPreset=v=>{
+  prefs.preset=v;
+  const state=window.__roadRush3DState?window.__roadRush3DState():null;
+  if(state&&state.settings){state.settings.graphics=v==='performance'?'Low':v==='ultra'?'Ultra':'High';state.settings.autoGraphics=v==='performance';state.settings.focus=v==='performance';state.settings.screenShake=v!=='performance';if(typeof window.syncSettings==='function')window.syncSettings()}
+  prefs.camera=v==='ultra'?'cinematic':v==='performance'?'close':'standard';
+  prefs.atmosphere=v==='ultra'?'sunset':'day';
+  save();
+  const status=document.getElementById('rrSettingsStatus');if(status)status.textContent=v==='performance'?'⚡ Performance preset applied':v==='ultra'?'✦ Visual preset applied':'◈ Balanced preset applied';
+ };
+ window.rrResetPremiumSettings=()=>{prefs={...defaults};save();const state=window.__roadRush3DState?window.__roadRush3DState():null;if(state&&state.settings){state.settings.graphics='High';state.settings.autoGraphics=true;state.settings.focus=false;state.settings.screenShake=true;if(typeof window.syncSettings==='function')window.syncSettings()}};
+ window.rrGetPremiumPrefs=()=>({...prefs});
+ document.addEventListener('DOMContentLoaded',sync);sync();
 })();
 </script>
 </body></html>
