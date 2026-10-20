@@ -540,7 +540,7 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
  <div class="gameoverlay hidden" id="crashOverlay"><div class="overlaypanel"><h2>Crash!</h2><p>You earned <b id="crashCash">$0</b> this run · <span id="crashKm">0.0 km</span></p><p>Watch the gaps and try again!</p><button class="bigbtn yellow" id="againBtn">▷ TRY AGAIN</button><div class="overlayactions"><button class="action blue" id="crashRestartBtn">⟳ Restart</button><button class="action pink" id="crashQuitBtn">⌂ Menu</button></div></div></div>
 </div>
 
-<div class="account-backdrop" id="accountModal" aria-hidden="true"><div class="account-panel" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><button class="account-close" onclick="closeAccount()" aria-label="Close">×</button><div class="account-brand">☁ CLOUD SAVE</div><h2 id="accountTitle">Save your progress online</h2><p class="setting-note">Create your own driver account. Your username, cars, cash and progress sync to your account when the game server is online.</p><div class="firebase-auth-card" style="border:2px solid #4a5275;border-radius:18px;padding:14px;margin:12px 0 18px;background:#13182d">
+<div class="account-backdrop" id="accountModal" aria-hidden="true"><div class="account-panel" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><button class="account-close" onclick="closeAccount()" aria-label="Close">×</button><div class="account-brand">☁ CLOUD SAVE</div><h2 id="accountTitle">Save your progress online</h2><p class="setting-note" id="accountIntro">Sign in to manage your Road Rush account.</p><div id="roadSignedOutView"><div class="firebase-auth-card" style="border:2px solid #4a5275;border-radius:18px;padding:14px;margin:12px 0 18px;background:#13182d">
 <div style="font-weight:900;font-size:20px;margin-bottom:10px">ROAD RUSH ACCOUNT</div>
 <button class="action blue" style="width:100%;margin-bottom:12px" onclick="roadGoogleSignIn()">Continue with Google</button>
 <div style="text-align:center;color:#b9bad1;margin:6px 0">— or use email —</div>
@@ -550,8 +550,26 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
 <div id="roadOtpArea" style="display:none;margin-top:12px"><label for="roadAuthOtp">SIX-DIGIT EMAIL CODE</label><input id="roadAuthOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="width:100%;margin:6px 0 10px"><button class="bigbtn yellow" style="width:100%" onclick="roadVerifyOtp()">VERIFY EMAIL CODE</button><button class="smallbtn gray" style="width:100%;margin-top:8px" onclick="roadResendOtp()">Send a new code</button></div>
 <p id="roadAuthStatus" class="setting-note" role="status" aria-live="polite">Email/password signup and sign-in require a six-digit email verification code.</p>
 <p id="roadAuthUser" class="setting-note"></p>
-</div>
-<button class="smallbtn pink" onclick="roadFirebaseSignOut()" style="width:100%;margin-top:10px">SIGN OUT OF FIREBASE</button></div></div>
+</div></div>
+<div id="roadSignedInView" style="display:none;border:1px solid #3b506b;border-radius:18px;padding:18px;margin-top:14px;background:#111b2c">
+ <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+  <div style="width:62px;height:62px;flex:0 0 62px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(140deg,#29486a,#14263b);border:1px solid #4d6a87;font-size:30px">👤</div>
+  <div style="min-width:0;flex:1">
+   <div style="color:#9fb5ce;font-size:11px;letter-spacing:1.4px;font-weight:900">YOUR DRIVER PROFILE</div>
+   <h3 id="roadProfileName" style="font-size:22px;line-height:1.2;margin:5px 0;overflow-wrap:anywhere">Driver</h3>
+   <div id="roadProfileEmail" style="font-size:13px;color:#aabbd0;overflow-wrap:anywhere"></div>
+  </div>
+ </div>
+ <div style="border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14;padding:14px 0;display:flex;align-items:center;justify-content:space-between;gap:12px">
+  <span style="color:#9fb5ce;font-size:13px">Sign-in method</span><b id="roadProfileProvider" style="text-align:right;font-size:13px">Google</b>
+ </div>
+ <div style="padding:14px 0;display:flex;align-items:center;justify-content:space-between;gap:12px">
+  <span style="color:#9fb5ce;font-size:13px">Game progress</span><b id="roadProfileSaveState" style="text-align:right;font-size:13px;color:#ffd56c">Saved on this device</b>
+ </div>
+ <p style="font-size:12px;line-height:1.5;color:#9fb5ce;margin:0 0 15px">Your sign-in is remembered by Google/Firebase. Cloud syncing for cash, cars and progress requires a configured game-save server.</p>
+ <button class="action blue" style="width:100%;margin-bottom:10px" onclick="roadEditProfileName()">EDIT DRIVER NAME</button>
+ <button id="roadFirebaseSignOutBtn" class="smallbtn pink" onclick="roadFirebaseSignOut()" style="width:100%;margin-top:0">SIGN OUT</button>
+</div></div></div>
 
 <script>
 (()=>{
@@ -603,7 +621,25 @@ function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;save
 async function loadCloudSave(silent=false){if(!cloudToken)return;try{const r=await apiRequest('/api/save');if(r.save)applyCloudSave(r.save);cloudStatus('Cloud save connected · '+(cloudUser||'player'),'good')}catch(e){cloudStatus((silent?'Cloud sync unavailable: ':'Could not load cloud save: ')+e.message+' · local save kept','error')}}
 function openAccount(){const modal=$('accountModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');updateAccountUi();setTimeout(()=>$('roadAuthEmail')?.focus(),40)}window.openAccount=openAccount;
 function closeAccount(){const m=$('accountModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}window.closeAccount=closeAccount;
-function updateAccountUi(){const logout=$('logoutBtn');if(logout)logout.style.display=cloudToken?'block':'none';const status=$('saveStatus');const firebaseUser=window.roadFirebaseUser;if(status)status.textContent=cloudToken?'Cloud save connected · '+(cloudUser||'account'):firebaseUser?'Signed in as '+(firebaseUser.displayName||firebaseUser.email)+' · progress is currently saved on this device':'Offline save · This device';const label=$('cloudButtonLabel');if(label)label.textContent=cloudToken?'Cloud save: '+(cloudUser||'connected'):firebaseUser?'Signed in: '+(firebaseUser.displayName||firebaseUser.email||'driver'):'Sign in to save online';}
+function updateAccountUi(){
+ const logout=$('logoutBtn');if(logout)logout.style.display=cloudToken?'block':'none';
+ const firebaseUser=window.roadFirebaseUser||null,signedIn=!!firebaseUser;
+ const signedOutView=$('roadSignedOutView'),signedInView=$('roadSignedInView');
+ if(signedOutView)signedOutView.style.display=signedIn?'none':'block';
+ if(signedInView)signedInView.style.display=signedIn?'block':'none';
+ const title=$('accountTitle'),intro=$('accountIntro');
+ if(title)title.textContent=signedIn?'Profile settings':'Save your progress online';
+ if(intro)intro.textContent=signedIn?'Manage your driver profile and account settings.':'Sign in to manage your Road Rush account.';
+ const profileName=$('roadProfileName'),profileEmail=$('roadProfileEmail'),provider=$('roadProfileProvider'),saveState=$('roadProfileSaveState');
+ if(profileName)profileName.textContent=firebaseUser?(firebaseUser.displayName||save.driver||'Driver'):'';
+ if(profileEmail)profileEmail.textContent=firebaseUser?(firebaseUser.email||'Google account'):'';
+ if(provider)provider.textContent=firebaseUser&&firebaseUser.providerData?.some(p=>p.providerId==='google.com')?'Google':firebaseUser&&firebaseUser.providerData?.some(p=>p.providerId==='password')?'Email and password':'Firebase';
+ if(saveState)saveState.textContent=cloudToken?'Cloud save connected':'Saved on this device';
+ const status=$('saveStatus');
+ if(status)status.textContent=cloudToken?'Cloud save connected · '+(cloudUser||'account'):firebaseUser?'Signed in as '+(firebaseUser.displayName||firebaseUser.email)+' · progress is currently saved on this device':'Offline save · This device';
+ const label=$('cloudButtonLabel');
+ if(label)label.textContent=cloudToken?'Cloud save: '+(cloudUser||'connected'):firebaseUser?(firebaseUser.displayName||firebaseUser.email||'My profile'):'Sign in to save online';
+}
 function saveApiServerUrl(){let u=$('apiServerUrl').value.trim();if(u){try{const p=new URL(u);if(!['http:','https:'].includes(p.protocol))throw new Error();u=p.origin}catch(e){cloudStatus('Enter a valid https:// game-server address.','error');return}}try{localStorage.setItem('cargo_run_api_url',u)}catch(e){}cloudStatus('Server address saved. Try signing in again.');}window.saveApiServerUrl=saveApiServerUrl;
 async function accountAction(action){const username=$('accountUsername').value.trim(),password=$('accountPassword').value;if(!/^[a-zA-Z0-9_]{3,20}$/.test(username)){cloudStatus('Username must be 3–20 letters, numbers or underscores.','error');return}if(password.length<8){cloudStatus('Password must be at least 8 characters.','error');return}const btn=action==='login'?$('loginBtn'):$('registerBtn');const old=btn.textContent;btn.disabled=true;btn.textContent='CONNECTING…';try{const result=await apiRequest('/api/auth/'+action,{method:'POST',headers:{Authorization:''},body:JSON.stringify({username,password,initialSave:action==='register'?save:undefined})});cloudToken=result.token;cloudUser=result.user?.username||username;localStorage.setItem('cargo_run_token',cloudToken);localStorage.setItem('cargo_run_username',cloudUser);if(result.save)applyCloudSave(result.save);else await loadCloudSave(true);save.driver=cloudUser;persist();updateHome();cloudStatus(action==='register'?'Account created. Your progress is now stored online.':'Signed in. Your online progress has been restored.','good');updateAccountUi();updateHome();renderJobs();renderAchievements();setTimeout(closeAccount,900)}catch(e){cloudStatus(e.message+' · check the server URL and try again.','error')}finally{btn.disabled=false;btn.textContent=old}}window.accountAction=accountAction;
 function logoutAccount(){cloudToken='';cloudUser='';localStorage.removeItem('cargo_run_token');localStorage.removeItem('cargo_run_username');updateAccountUi();cloudStatus('Signed out. This device keeps its local save.');}window.logoutAccount=logoutAccount;
@@ -1055,6 +1091,15 @@ window.roadAskForName = function() {
   modal.style.display = "flex";
   setTimeout(() => input.focus(), 30);
   return new Promise(resolve => { roadNameResolve = resolve; });
+};
+window.roadEditProfileName = async function() {
+  if (!roadAuth?.currentUser) return roadAuthStatus("Please sign in again.", true);
+  try {
+    await roadAskForName();
+    window.roadFirebaseUser = roadAuth.currentUser;
+    if (typeof window.updateAccountUi === "function") window.updateAccountUi();
+    if (typeof window.updateHome === "function") window.updateHome();
+  } catch (e) { roadAuthStatus(e.message || "Could not edit driver name.", true); }
 };
 window.roadSaveName = async function() {
   const input = document.getElementById("roadDisplayName");
