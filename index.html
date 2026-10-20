@@ -1056,6 +1056,7 @@ function sound(freq=440,dur=.08){if(!settings.sound)return;const a=ensureAudio()
 // Top-down road and lane-change survival loop.
 const canvas=$('roadCanvas'),ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});let W=0,H=0,dpr=1,raf=0,last=0,game={running:false,paused:false,dead:false,lane:1,visualLane:1,speed:31,km:0,cash:0,elapsed:0,traffic:[],items:[],boss:null,bossBullets:[],bossLevel:0,bossNextAt:300,bossWarningFor:0,weaponAmmo:0,roadOffset:0,spawn:0,fuel:100,runNumber:0,shake:0,passiveCash:0,magnetTime:0,boostTime:0,runFinalized:false,fpsEMA:60,graphicsTimer:0,padLeft:false,padRight:false};let laneCount=3;let audioStarted=false;let helpHideTimer=0;
 function resize(){const mobile=matchMedia('(max-width: 760px)').matches;const dprCap=settings.graphics==='Ultra'?(mobile?1.35:1.75):settings.graphics==='High'?(mobile?1.2:1.4):settings.graphics==='Medium'?(mobile?1.05:1.2):1;dpr=Math.min(devicePixelRatio||1,dprCap);W=canvas.clientWidth=innerWidth;H=canvas.clientHeight=innerHeight;canvas.width=Math.max(1,Math.floor(W*dpr));canvas.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+window.__roadRush3DState=()=>({game,save,settings});
 function drawCar(x,y,w,h,color,player=false,kind='car',lean=0){
  ctx.save();ctx.translate(x,y);ctx.rotate(lean);if(!player)ctx.rotate(Math.PI);
  const isTruck=kind==='truck',isVan=kind==='van',bodyW=w*(isTruck?.98:isVan?.92:.84),bodyH=h*(isTruck?.98:isVan?.92:.82),r=Math.max(4,w*.16);
@@ -1742,7 +1743,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
   box(propsGroup,180,.1,180,grassMat,0,-.28,-58);
   for(let i=0;i<64;i++){
    const side=i%2?-1:1,z=-(i*11+8),x=side*(7.5+(i%4)*2.2),group=new THREE.Group();group.position.set(x,-.2,z);propsGroup.add(group);
-   const mapIdx=()=>window.save?.selectedMap??0;const mi=mapIdx();
+   const mapIdx=()=>window.__roadRush3DState?window.__roadRush3DState().save?.selectedMap??0:0;const mi=mapIdx();
    if([7,8,10,15,16].includes(mi)&&i%3!==0){
     const h=4+(i%7)*1.5,w=2+(i%3)*.65;box(group,w,h,2,buildingMats[i%buildingMats.length],0,h/2,0);
     const win=mat([0x8bd5e8,0xffdca1,0xb5d5e5][i%3],.35);for(let yy=1;yy<h-0.5;yy+=1.25)for(let xx=-w/2+.4;xx<w/2-.1;xx+=.75)box(group,.22,.3,.035,win,xx,yy,1.02);
@@ -1774,8 +1775,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
   let last=performance.now();
   function render(now){
    requestAnimationFrame(render);const dt=Math.min(.05,(now-last)/1000);last=now;
-   const g=window.game||{},active=view.classList.contains('active'),speed=Number(g.speed)||35,offset=Number(g.roadOffset)||0,lane=Number(g.visualLane??g.lane)||0,elapsed=Number(g.elapsed)||0;
-   const selected=Number(window.save?.selectedMap)||0,snow=[17,18,19].includes(selected),city=[7,8,10,15,16].includes(selected),desert=[3,4].includes(selected);
+   const state=window.__roadRush3DState?window.__roadRush3DState():{},g=state.game||{},save=state.save||{},active=view.classList.contains('active'),speed=Number(g.speed)||35,offset=Number(g.roadOffset)||0,lane=Number(g.visualLane??g.lane)||0,elapsed=Number(g.elapsed)||0;
+   const selected=Number(save.selectedMap)||0,snow=[17,18,19].includes(selected),city=[7,8,10,15,16].includes(selected),desert=[3,4].includes(selected);
    const sky=snow?0x9daebc:city?0x91a9c0:desert?0xe6b878:0x91b6cf,ground=snow?0xdbe5ec:city?0x65766f:desert?0xb99564:0x4e7953;
    scene.background.setHex(sky);scene.fog.color.setHex(sky);grassMat.color.setHex(ground);
    roadGroup.position.z=(offset*.035)%10;
