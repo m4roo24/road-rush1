@@ -1796,11 +1796,11 @@ initRoadAuth();
  try{
   renderer=new THREE.WebGLRenderer({canvas,antialias:innerWidth>600,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight,false);
-  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=innerWidth>720;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   scene=new THREE.Scene();scene.background=new THREE.Color(0x91b6cf);scene.fog=new THREE.Fog(0x91b6cf,35,135);
   camera=new THREE.PerspectiveCamera( sixty(),innerWidth/innerHeight,.1,220);camera.position.set(0,5.2,10.5);
   scene.add(new THREE.HemisphereLight(0xe5f5ff,0x48503c,2.15));
-  const sun=new THREE.DirectionalLight(0xffedce,3.1);sun.position.set(-8,16,7);scene.add(sun);
+  const sun=new THREE.DirectionalLight(0xffedce,3.1);sun.position.set(-8,16,7);sun.castShadow=innerWidth>720;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=24;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.00025;scene.add(sun);
   const fill=new THREE.DirectionalLight(0x8ecbff,.8);fill.position.set(8,5,-12);scene.add(fill);
   world=new THREE.Group();scene.add(world);roadGroup=new THREE.Group();propsGroup=new THREE.Group();trafficGroup=new THREE.Group();world.add(roadGroup,propsGroup,trafficGroup);
   const mat=(color,roughness=.86,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
@@ -1814,7 +1814,7 @@ initRoadAuth();
   }
   const roadTexture=makeRoadTexture();
   const roadMat=new THREE.MeshStandardMaterial({map:roadTexture,color:0xffffff,roughness:.98}),shoulderMat=mat(0x6b716e),edgeMat=mat(0xf0e7cf),laneMat=mat(0xe8e4d7),wheelMat=mat(0x111318,.92),glassMat=mat(0x76a9bf,.22,.12);
-  function box(parent,w,h,d,material,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);parent.add(m);return m}
+  function box(parent,w,h,d,material,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=innerWidth>720;m.receiveShadow=true;parent.add(m);return m}
   box(roadGroup,11,.18,180,roadMat,0,-.12,-58);box(roadGroup,1.2,.13,180,shoulderMat,-6.05,-.16,-58);box(roadGroup,1.2,.13,180,shoulderMat,6.05,-.16,-58);
   box(roadGroup,.13,.035,180,edgeMat,-5.25,-.01,-58);box(roadGroup,.13,.035,180,edgeMat,5.25,-.01,-58);
   for(let side of [-1,1]){box(roadGroup,.12,.04,180,mat(0xd4d7d6),side*6.65,.05,-58);for(let z=6;z>-120;z-=7){box(roadGroup,.28,.035,3.5,side===-1?mat(0xe5e3db):mat(0xe5e3db),side*6.05,.01,z)}}
@@ -1859,7 +1859,7 @@ initRoadAuth();
     box(g,.08,.16,.2,trim,side*.9,.94,.1);
     box(g,.025,.22,.62,chrome,side*.605,.97,-.03);
     for(const z of [-.91,.91]){
-     const tire=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.19,16),rubber);tire.rotation.z=Math.PI/2;tire.position.set(side*.86,.34,z);g.add(tire);
+     const tire=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.19,16),rubber);tire.rotation.z=Math.PI/2;tire.position.set(side*.86,.34,z);tire.castShadow=innerWidth>720;g.add(tire);
      const rim=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,.205,12),chrome);rim.rotation.z=Math.PI/2;rim.position.set(side*1.0,.34,z);g.add(rim);
      const hub=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.212,12),trim);hub.rotation.z=Math.PI/2;hub.position.set(side*1.01,.34,z);g.add(hub);
     }
