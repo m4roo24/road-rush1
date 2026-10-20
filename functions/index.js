@@ -122,3 +122,78 @@ exports.verifyEmailOtp = onCall({
   await auth.setCustomUserClaims(uid, { ...(user.customClaims || {}), emailOtpVerified: true });
   return { verified: true };
 });
+
+
+function requireCloudSaveUser(request) {
+  if (!request.auth) throw new HttpsError("unauthenticated", "Sign in to your Road Rush account first.");
+  const provider = request.auth.token.firebase?.sign_in_provider;
+  if (provider === "password" && request.auth.token.emailOtpVerified !== true) {
+    throw new HttpsError("permission-denied", "Verify your six-digit email code before syncing or redeeming account rewards.");
+  }
+  return request.auth.uid;
+}
+
+// The client only reads/writes the save belonging to its authenticated Firebase UID.
+// Admin SDK access keeps the existing deny-all Firestore client rules in place.
+exports.savePlayerProgress = onCall({ enforceAppCheck: false }, async (request) => {
+  const uid = requireCloudSaveUser(request);
+  const action = String(request.data?.action || "");
+  const ref = db.collection("playerSaves").doc(uid);
+
+  if (action === "load") {
+    const snap = await ref.get();
+    const data = snap.exists ? snap.data() : null;
+    return { exists: !!(data && data.save), save: data && data.save ? data.save : null };
+  }
+  if (action !== "save") throw new HttpsError("invalid-argument", "Use the load or save action.");
+
+  const save = request.data?.save;
+  if (!save || typeof save !== "object" || Array.isArray(save)) {
+    throw new HttpsError("invalid-argument", "The game save is missing or invalid.");
+  }
+  let serialized;
+  try { serialized = JSON.stringify(save); }
+  catch { throw new HttpsError("invalid-argument", "The game save could not be read."); }
+  if (serialized.length > 180000) throw new HttpsError("invalid-argument", "The game save is too large.");
+  if (!Number.isFinite(Number(save.cash)) || Number(save.cash) < 0) {
+    throw new HttpsError("invalid-argument", "The saved cash balance is invalid.");
+  }
+
+  await ref.set({ save, updatedAt: Timestamp.now() }, { merge: true });
+  return { ok: true, savedAt: Date.now() };
+});
+
+// A server-side transaction makes ROADRUSH1T a truly global single-use code:
+// two accounts attempting it at the same time cannot both receive the reward.
+exports.redeemRoadRushCode = onCall({ enforceAppCheck: false }, async (request) => {
+  const uid = requireCloudSaveUser(request);
+  const code = String(request.data?.code || "").trim().toUpperCase();
+  if (code !== "ROADRUSH1T") throw new HttpsError("invalid-argument", "That special code is not recognized.");
+
+  const claimRef = db.collection("redeemCodes").doc("ROADRUSH1T");
+  const saveRef = db.collection("playerSaves").doc(uid);
+
+  const result = await db.runTransaction(async (tx) => {
+    const claimSnap = await tx.get(claimRef);
+    const saveSnap = await tx.get(saveRef);
+
+    if (claimSnap.exists) {
+      const claim = claimSnap.data() || {};
+      if (claim.uid === uid) throw new HttpsError("already-exists", "This unique code was already redeemed by your account.");
+      throw new HttpsError("failed-precondition", "This unique code has already been redeemed by another player.");
+    }
+
+    const stored = saveSnap.exists ? saveSnap.data() : null;
+    const current = stored && stored.save && typeof stored.save === "object" ? { ...stored.save } : {};
+    const oldCash = Number(current.cash);
+    current.cash = Math.max(0, Number.isFinite(oldCash) ? oldCash : 0) + 1000000000000;
+    current.redeemedCodes = Array.isArray(current.redeemedCodes) ? current.redeemedCodes : [];
+    if (!current.redeemedCodes.includes("ROADRUSH1T")) current.redeemedCodes.push("ROADRUSH1T");
+
+    tx.set(claimRef, { uid, redeemedAt: Timestamp.now() });
+    tx.set(saveRef, { save: current, updatedAt: Timestamp.now() }, { merge: true });
+    return current;
+  });
+
+  return { ok: true, save: result, reward: 1000000000000 };
+});
