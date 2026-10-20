@@ -1846,14 +1846,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
   let last=performance.now();
   function render(now){
    requestAnimationFrame(render);const dt=Math.min(.05,(now-last)/1000);last=now;
-   const state=window.__roadRush3DState?window.__roadRush3DState():{},g=state.game||{},save=state.save||{},active=view.classList.contains('active'),speed=Number(g.speed)||35,offset=Number(g.roadOffset)||0,lane=Number(g.visualLane??g.lane)||0,elapsed=Number(g.elapsed)||0;
+   const state=window.__roadRush3DState?window.__roadRush3DState():{},g=state.game||{},save=state.save||{},active=view.classList.contains('active'),speed=Number(g.speed)||35,offset=Number(g.roadOffset)||0,lane=Number(g.visualLane??g.lane)||0,elapsed=Number(g.elapsed)||0,prefs=window.rrGetPremiumPrefs?window.rrGetPremiumPrefs():{camera:'standard',atmosphere:'day',cockpit:true};
    const selected=Number(save.selectedMap)||0,snow=[17,18,19].includes(selected),city=[7,8,10,15,16].includes(selected),desert=[3,4].includes(selected);
-   const sky=snow?0x9daebc:city?0x91a9c0:desert?0xe6b878:0x91b6cf,ground=snow?0xdbe5ec:city?0x65766f:desert?0xb99564:0x4e7953;
-   scene.background.setHex(sky);scene.fog.color.setHex(sky);grassMat.color.setHex(ground);
+   let sky=snow?0x9daebc:city?0x91a9c0:desert?0xe6b878:0x91b6cf,ground=snow?0xdbe5ec:city?0x65766f:desert?0xb99564:0x4e7953;
+   if(prefs.atmosphere==='sunset'){sky=0xe39a75;sun.color.setHex(0xffb66b);sun.intensity=2.2;fill.intensity=.55}else if(prefs.atmosphere==='night'){sky=0x101a30;sun.color.setHex(0x7fa9ff);sun.intensity=.55;fill.intensity=1.15}else{sun.color.setHex(0xffedce);sun.intensity=3.1;fill.intensity=.8}
+   scene.background.setHex(sky);scene.fog.color.setHex(sky);grassMat.color.setHex(prefs.atmosphere==='night'?(snow?0x313d4d:desert?0x493d37:0x182d28):ground);
    roadGroup.position.z=(offset*.035)%10;
    props.forEach((p,i)=>{const base=-(i*11+8);p.position.z=base+((offset*.065)%145);if(p.position.z>12)p.position.z-=145});
    player.position.x+=(lane*1.75-player.position.x)*Math.min(1,dt*7);player.position.y=.03+Math.sin(elapsed*speed*.018)*.018;player.rotation.z+=( -((lane*1.75-player.position.x)*.06)-player.rotation.z)*Math.min(1,dt*4);
-   camera.position.x+=(player.position.x*.24-camera.position.x)*Math.min(1,dt*1.8);camera.position.y=5.1+Math.min(speed/220,.55);camera.lookAt(player.position.x*.2,.2,-13);
+   const camClose=prefs.camera==='close',camCinematic=prefs.camera==='cinematic';camera.position.x+=(player.position.x*(camCinematic?.12:.24)-camera.position.x)*Math.min(1,dt*1.8);camera.position.y=(camClose?3.8:camCinematic?6.8:5.1)+Math.min(speed/260,.55);camera.position.z=camClose?7.7:camCinematic?13.5:10.5;camera.lookAt(player.position.x*(camCinematic?.1:.2),.2,camCinematic?-18:-13);
    traffic.forEach((c,i)=>{const z=-12-((i*17+elapsed*(2.5+speed*.018))%105);c.position.z=z;c.position.x=([-3.5,-1.75,0,1.75,3.5][(i*3+Math.floor(i/2))%5]);c.visible=z<4&&z>-105});
    if(active){renderer.render(scene,camera)}else{renderer.render(scene,camera)}
   }
