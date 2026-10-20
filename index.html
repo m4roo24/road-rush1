@@ -965,6 +965,7 @@ function initRoadAuth() {
     roadFunctions = getFunctions(app, "us-central1");
     onAuthStateChanged(roadAuth, user => {
       window.roadFirebaseUser = user || null;
+      if (typeof window.updateAccountUi === "function") window.updateAccountUi();
       const label = document.getElementById("roadAuthUser");
       if (label) label.textContent = user ? "Account: " + (user.displayName || user.email || "Firebase user") : "Sign in to your account";
       const cloudLabel = document.getElementById("cloudButtonLabel");
@@ -1088,6 +1089,9 @@ window.roadFirebaseSignOut = async function() {
   if (roadAuth) await signOut(roadAuth);
   roadOtpPending = false;
   roadAuthStatus("Signed out of Firebase.");
+  if (typeof window.updateAccountUi === "function") window.updateAccountUi();
 };
+// Initialize at page load so Firebase can restore the persisted Google session.
+initRoadAuth();
 </script>
 </body></html>
