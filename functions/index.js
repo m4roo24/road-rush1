@@ -168,9 +168,9 @@ exports.savePlayerProgress = onCall({ enforceAppCheck: false }, async (request) 
 exports.redeemRoadRushCode = onCall({ enforceAppCheck: false }, async (request) => {
   const uid = requireCloudSaveUser(request);
   const code = String(request.data?.code || "").trim().toUpperCase();
-  if (code !== "ROADRUSH1T") throw new HttpsError("invalid-argument", "That special code is not recognized.");
+  if (code !== "KUW") throw new HttpsError("invalid-argument", "That special code is not recognized.");
 
-  const claimRef = db.collection("redeemCodes").doc("ROADRUSH1T");
+  const claimRef = db.collection("redeemCodes").doc("KUW");
   const saveRef = db.collection("playerSaves").doc(uid);
 
   const result = await db.runTransaction(async (tx) => {
@@ -188,7 +188,7 @@ exports.redeemRoadRushCode = onCall({ enforceAppCheck: false }, async (request) 
     const oldCash = Number(current.cash);
     current.cash = Math.max(0, Number.isFinite(oldCash) ? oldCash : 0) + 1000000000000;
     current.redeemedCodes = Array.isArray(current.redeemedCodes) ? current.redeemedCodes : [];
-    if (!current.redeemedCodes.includes("ROADRUSH1T")) current.redeemedCodes.push("ROADRUSH1T");
+    if (!current.redeemedCodes.includes("KUW")) current.redeemedCodes.push("KUW");
 
     tx.set(claimRef, { uid, redeemedAt: Timestamp.now() });
     tx.set(saveRef, { save: current, updatedAt: Timestamp.now() }, { merge: true });
