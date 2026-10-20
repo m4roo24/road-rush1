@@ -776,6 +776,14 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
 @media(max-width:390px){.app{padding:12px!important}.save{font-size:10px!important;padding:9px!important}.veh-name{font-size:30px!important}.pill{font-size:9px!important}.navbtn{padding:9px!important}.navbtn .navtxt{font-size:11px!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
+<style id="road-rush-3d-renderer-style">
+#roadCanvas{visibility:hidden!important}
+#gameview.road3d-ready #roadCanvas{visibility:hidden!important}
+#road3dCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}
+#gameview>*:not(#roadCanvas):not(#road3dCanvas){z-index:2}
+#gameview{isolation:isolate}
+#gameview:not(.road3d-ready) #roadCanvas{visibility:visible!important}
+</style>
 </head>
 <body>
 <main class="app" id="app">
@@ -1707,4 +1715,78 @@ initRoadAuth();
 })();
 </script>
 <script>window.__ROAD_RUSH_BUILD__="2026-10-20-nextgen-ui-hud-toggle";</script>
+<script type="module" id="road-rush-3d-renderer">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+(()=>{
+ const view=document.getElementById('gameview'),old=document.getElementById('roadCanvas');
+ if(!view||!old)return;
+ const canvas=document.createElement('canvas');canvas.id='road3dCanvas';canvas.setAttribute('aria-label','Real-time 3D road view');view.insertBefore(canvas,old.nextSibling);
+ let renderer,scene,camera,world,roadGroup,player,trafficGroup,propsGroup,roadMarks=[],props=[],traffic=[];
+ try{
+  renderer=new THREE.WebGLRenderer({canvas,antialias:innerWidth>600,alpha:false,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight,false);
+  renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x91b6cf);scene.fog=new THREE.Fog(0x91b6cf,35,135);
+  camera=new THREE.PerspectiveCamera( sixty(),innerWidth/innerHeight,.1,220);camera.position.set(0,5.2,10.5);
+  scene.add(new THREE.HemisphereLight(0xe5f5ff,0x48503c,2.15));
+  const sun=new THREE.DirectionalLight(0xffedce,3.1);sun.position.set(-8,16,7);scene.add(sun);
+  const fill=new THREE.DirectionalLight(0x8ecbff,.8);fill.position.set(8,5,-12);scene.add(fill);
+  world=new THREE.Group();scene.add(world);roadGroup=new THREE.Group();propsGroup=new THREE.Group();trafficGroup=new THREE.Group();world.add(roadGroup,propsGroup,trafficGroup);
+  const mat=(color,roughness=.86,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+  const roadMat=mat(0x303741,.95),shoulderMat=mat(0x7a817d),edgeMat=mat(0xf1e7cb),laneMat=mat(0xf7f3dd),wheelMat=mat(0x11151b),glassMat=mat(0x8ed5ee,.25,.25);
+  function box(parent,w,h,d,material,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);parent.add(m);return m}
+  box(roadGroup,11,.18,180,roadMat,0,-.12,-58);box(roadGroup,1.2,.13,180,shoulderMat,-6.05,-.16,-58);box(roadGroup,1.2,.13,180,shoulderMat,6.05,-.16,-58);
+  box(roadGroup,.13,.035,180,edgeMat,-5.25,-.01,-58);box(roadGroup,.13,.035,180,edgeMat,5.25,-.01,-58);
+  for(let lane=-1;lane<=1;lane++)if(lane!==0){for(let z=6;z>-120;z-=10){const mark=box(roadGroup,.095,.025,3.8,laneMat,lane*1.75,.0,z);roadMarks.push(mark)}}
+  const grassMat=mat(0x4d7250),snowMat=mat(0xe4edf2),trunkMat=mat(0x594535),leafMats=[mat(0x2d6c4b),mat(0x477d4a),mat(0x688b52)],buildingMats=[mat(0x647b91),mat(0xb6a58b),mat(0x556475),mat(0xc8d3d8)],rockMat=mat(0x8d7159);
+  box(propsGroup,180,.1,180,grassMat,0,-.28,-58);
+  for(let i=0;i<64;i++){
+   const side=i%2?-1:1,z=-(i*11+8),x=side*(7.5+(i%4)*2.2),group=new THREE.Group();group.position.set(x,-.2,z);propsGroup.add(group);
+   const mapIdx=()=>window.save?.selectedMap??0;const mi=mapIdx();
+   if([7,8,10,15,16].includes(mi)&&i%3!==0){
+    const h=4+(i%7)*1.5,w=2+(i%3)*.65;box(group,w,h,2,buildingMats[i%buildingMats.length],0,h/2,0);
+    const win=mat([0x8bd5e8,0xffdca1,0xb5d5e5][i%3],.35);for(let yy=1;yy<h-0.5;yy+=1.25)for(let xx=-w/2+.4;xx<w/2-.1;xx+=.75)box(group,.22,.3,.035,win,xx,yy,1.02);
+   }else if([17,18,19].includes(mi)){
+    box(group,.28,2,.28,trunkMat,0,.8,0);
+    for(let j=0;j<3;j++){const cone=new THREE.Mesh(new THREE.ConeGeometry(1.25-j*.2,2.7,7),snowMat);cone.position.set(0,2.1+j*1.35,0);group.add(cone)}
+   }else if([3,4].includes(mi)){
+    const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(1.6+(i%3)*.5,0),rockMat);rock.scale.set(1.4,.9,1);rock.position.y=.8;group.add(rock);
+   }else{
+    box(group,.25,1.5,.25,trunkMat,0,.65,0);const tree=new THREE.Mesh(new THREE.ConeGeometry(1.35+(i%3)*.18,3.6,7),leafMats[i%3]);tree.position.y=2.6;group.add(tree);
+   }
+   props.push(group);
+  }
+  function makeCar(color,isPlayer=false){
+   const g=new THREE.Group(),paint=mat(color,.32,.28),dark=mat(0x151b22,.7),glass=mat(0x75b8d2,.24,.1),lamp=mat(0xfff0b2,.25);
+   box(g,1.55,.5,2.8,paint,0,.58,0);box(g,1.22,.52,1.3,paint,0,1.02,.18);box(g,1.08,.38,.92,glass,0,1.15,-.04);box(g,1.25,.25,.68,dark,0,.94,-.77);
+   for(const x of [-.82,.82])for(const z of [-.83,.83]){const w=box(g,.22,.45,.55,wheelMat,x,.32,z);w.rotation.z=0}
+   for(const x of [-.48,.48])box(g,.25,.1,.08,lamp,x,.7,1.42);
+   if(isPlayer){const stripe=mat(0xd7ff38,.35);box(g,.12,.025,1.25,stripe,0,1.285,.05)}
+   return g;
+  }
+  player=makeCar(0xeab72d,true);player.position.set(0,0,3);scene.add(player);
+  const trafficColors=[0xd84843,0x4b93d1,0xe9ecef,0x3eaa78,0xb18ae8,0xe8a14b];
+  for(let i=0;i<10;i++){const c=makeCar(trafficColors[i%trafficColors.length]);c.scale.setScalar(.86);trafficGroup.add(c);traffic.push(c)}
+  view.classList.add('road3d-ready');old.style.visibility='hidden';
+  function sixty(){return 60}
+  function resize(){const w=innerWidth,h=innerHeight;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  addEventListener('resize',resize,{passive:true});
+  let last=performance.now();
+  function render(now){
+   requestAnimationFrame(render);const dt=Math.min(.05,(now-last)/1000);last=now;
+   const g=window.game||{},active=view.classList.contains('active'),speed=Number(g.speed)||35,offset=Number(g.roadOffset)||0,lane=Number(g.visualLane??g.lane)||0,elapsed=Number(g.elapsed)||0;
+   const selected=Number(window.save?.selectedMap)||0,snow=[17,18,19].includes(selected),city=[7,8,10,15,16].includes(selected),desert=[3,4].includes(selected);
+   const sky=snow?0x9daebc:city?0x91a9c0:desert?0xe6b878:0x91b6cf,ground=snow?0xdbe5ec:city?0x65766f:desert?0xb99564:0x4e7953;
+   scene.background.setHex(sky);scene.fog.color.setHex(sky);grassMat.color.setHex(ground);
+   roadGroup.position.z=(offset*.035)%10;
+   props.forEach((p,i)=>{const base=-(i*11+8);p.position.z=base+((offset*.065)%145);if(p.position.z>12)p.position.z-=145});
+   player.position.x+=(lane*1.75-player.position.x)*Math.min(1,dt*7);player.position.y=.03+Math.sin(elapsed*speed*.018)*.018;player.rotation.z+=( -((lane*1.75-player.position.x)*.06)-player.rotation.z)*Math.min(1,dt*4);
+   camera.position.x+=(player.position.x*.24-camera.position.x)*Math.min(1,dt*1.8);camera.position.y=5.1+Math.min(speed/220,.55);camera.lookAt(player.position.x*.2,.2,-13);
+   traffic.forEach((c,i)=>{const z=-12-((i*17+elapsed*(2.5+speed*.018))%105);c.position.z=z;c.position.x=([-3.5,-1.75,0,1.75,3.5][(i*3+Math.floor(i/2))%5]);c.visible=z<4&&z>-105});
+   if(active){renderer.render(scene,camera)}else{renderer.render(scene,camera)}
+  }
+  requestAnimationFrame(render);
+ }catch(err){console.warn('3D renderer unavailable; retaining original canvas game',err);canvas.remove();view.classList.remove('road3d-ready');old.style.visibility='visible'}
+})();
+</script>
 </body></html>
