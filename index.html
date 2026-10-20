@@ -1918,7 +1918,7 @@ initRoadAuth();
    const graphicsLevel=String(state.settings?.graphics||'High').toLowerCase();
    const quality=graphicsLevel==='low'||prefs.preset==='performance'?'performance':graphicsLevel==='ultra'||prefs.preset==='ultra'?'ultra':'balanced';
    if(quality!==appliedQuality){
-    const pixelCap=quality==='performance'?(mobileDevice?.9:1):quality==='ultra'?(mobileDevice?1.25:1.75):(mobileDevice?1.05:1.45);
+    const pixelCap=quality==='performance'?(mobileDevice ? 0.9 : 1.0):quality==='ultra'?(mobileDevice ? 1.25 : 1.75):(mobileDevice ? 1.05 : 1.45);
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,pixelCap));renderer.setSize(innerWidth,innerHeight,false);
     renderer.shadowMap.enabled=quality!=='performance';sun.castShadow=quality!=='performance';
     const shadowSize=mobileDevice?512:quality==='ultra'?1536:1024;sun.shadow.mapSize.set(shadowSize,shadowSize);
