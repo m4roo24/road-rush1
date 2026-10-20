@@ -1,7 +1,7 @@
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type"
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
 
 export default {
@@ -9,6 +9,10 @@ export default {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
     if (url.pathname === "/health") return Response.json({ ok: true, service: "road-rush-cloudflare-multiplayer" }, { headers: corsHeaders });
+    if (url.pathname === "/api/leaderboard") {
+      const id = env.LEADERBOARD.idFromName("global");
+      return env.LEADERBOARD.get(id).fetch(request);
+    }
     if (url.pathname === "/ws") {
       if (request.headers.get("Upgrade") !== "websocket") return new Response("WebSocket upgrade required", { status: 426 });
       let code = (url.searchParams.get("roomCode") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
@@ -25,6 +29,36 @@ export default {
     return new Response("Road Rush Cloudflare multiplayer is ready. Use /health or /ws.", { headers: { ...corsHeaders, "Content-Type": "text/plain" } });
   }
 };
+
+export class LeaderboardStore {
+  constructor(ctx, env) { this.ctx = ctx; this.env = env; }
+  async fetch(request) {
+    const headers = { ...corsHeaders, "Content-Type": "application/json" };
+    if (request.method === "OPTIONS") return new Response(null, { headers });
+    if (request.method === "GET") {
+      const entries = (await this.ctx.storage.get("entries")) || [];
+      entries.sort((a,b) => b.best-a.best || b.runs-a.runs);
+      return Response.json({ entries: entries.slice(0,100) }, { headers });
+    }
+    if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers });
+    let body;
+    try { body = await request.json(); } catch { return Response.json({ error: "Invalid JSON" }, { status: 400, headers }); }
+    const username = String(body.username || "Driver").replace(/[<>\\u0000-\\u001f]/g, "").trim().slice(0, 18) || "Driver";
+    const best = Math.floor(Number(body.best));
+    const runs = Math.floor(Number(body.runs));
+    if (!Number.isFinite(best) || best < 0 || best > 1000000000 || !Number.isFinite(runs) || runs < 1 || runs > 1000000000) {
+      return Response.json({ error: "Invalid score" }, { status: 400, headers });
+    }
+    const entries = (await this.ctx.storage.get("entries")) || [];
+    const key = username.toLowerCase();
+    const existing = entries.find(e => e.username.toLowerCase() === key);
+    if (existing) { existing.best = Math.max(existing.best, best); existing.runs = Math.max(existing.runs, runs); existing.username = username; }
+    else entries.push({ username, best, runs });
+    entries.sort((a,b) => b.best-a.best || b.runs-a.runs);
+    await this.ctx.storage.put("entries", entries.slice(0,500));
+    return Response.json({ ok: true }, { headers });
+  }
+}
 
 export class RaceRoom {
   constructor(ctx, env) {
