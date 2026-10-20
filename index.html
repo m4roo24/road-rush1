@@ -1788,7 +1788,8 @@ initRoadAuth();
 </script>
 <script>window.__ROAD_RUSH_BUILD__="2026-10-20-full-3d-gameplay-sync";</script>
 <script type="module" id="road-rush-3d-renderer">
-(async()=>{let THREE;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js')}catch(primaryError){try{THREE=await import('https://unpkg.com/three@0.165.0/build/three.module.js')}catch(backupError){console.error('Road Rush 3D engine could not load from either CDN',primaryError,backupError);return}}
+(async()=>{return; // Temporarily use the original 2D canvas while 3D is disabled.
+let THREE;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js')}catch(primaryError){try{THREE=await import('https://unpkg.com/three@0.165.0/build/three.module.js')}catch(backupError){console.error('Road Rush 3D engine could not load from either CDN',primaryError,backupError);return}}
  const view=document.getElementById('gameview'),old=document.getElementById('roadCanvas');
  if(!view||!old)return;
  const canvas=document.createElement('canvas');canvas.id='road3dCanvas';canvas.setAttribute('aria-label','Real-time 3D road view');view.insertBefore(canvas,old.nextSibling);
@@ -2033,4 +2034,9 @@ initRoadAuth();
  },true);
 })();
 </script>
+<style id="road-rush-temporary-2d-mode">
+#roadCanvas{display:block!important;visibility:visible!important;opacity:1!important}
+#gameview.road3d-ready #roadCanvas{visibility:visible!important}
+#road3dCanvas{display:none!important;visibility:hidden!important}
+</style>
 </body></html>
