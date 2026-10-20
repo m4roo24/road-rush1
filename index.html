@@ -2062,5 +2062,40 @@ let THREE;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.165.0/bui
 #settings .rr-settings-chips span{border-color:var(--settings-border);background:#ffffff05}
 @media(max-width:520px){#settings .rr-settings-hero{padding:17px 15px}#settings .rr-settings-card{padding:12px}#settings .optionrow{gap:10px;padding:12px 11px;font-size:13px}#settings .sectionlabel{padding:12px 11px}#settings .choicegroup{padding:10px 9px;gap:6px}#settings .choicegroup button{font-size:11px;padding:9px 5px}}
 
+
+/* Premium styling for the remaining Settings sections */
+#settings .rr-settings-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 22px;padding:12px 14px;border:1px solid #29343c;border-radius:15px;background:linear-gradient(135deg,#171f27,#10151b)}
+#settings .rr-settings-actions button{padding:10px 12px;border:1px solid #c8ff3844;border-radius:10px;background:#c8ff3810;color:#d6ff83;font:850 10px/1.2 system-ui;letter-spacing:.6px}
+#settings #rrSettingsStatus{color:#82919d;font:600 10px/1.4 system-ui}
+#settings .sectionlabel{display:flex;align-items:center;gap:10px;margin:24px 2px 10px;padding:0;border:0;color:#c8ff38;font:900 11px/1.4 system-ui;letter-spacing:1.7px;text-transform:uppercase}
+#settings .sectionlabel:before{content:"";width:4px;height:18px;border-radius:4px;background:#c8ff38;box-shadow:0 0 12px #c8ff3825}
+#settings .optionrow{position:relative;min-height:58px;gap:14px;margin:0 0 8px;padding:13px 14px;border:1px solid #29343d;border-radius:15px;background:linear-gradient(145deg,#18212a,#11171e);box-shadow:0 5px 16px #00000012;color:#eaf0f4;font:650 13px/1.45 system-ui}
+#settings .optionrow>span,#settings .optionrow>div{min-width:0;flex:1}
+#settings .optionrow .setting-note{margin-top:4px;color:#8998a5;font:500 11px/1.5 system-ui}
+#settings .optionrow:has(input[type=range]){flex-wrap:wrap}
+#settings .optionrow input[type=range]{width:100%;flex:0 0 100%;height:6px;margin:4px 0 2px;border-radius:20px;accent-color:#c8ff38;cursor:pointer}
+#settings .toggle{width:48px;height:27px;min-width:48px;border:1px solid #3a4650;border-radius:99px;background:#27313b;box-shadow:none;transition:background .18s,border-color .18s;cursor:pointer}
+#settings .toggle:before{width:19px;height:19px;top:3px;left:3px;background:#c0cad2;box-shadow:none}
+#settings .toggle.on{border-color:#c8ff38;background:#9ecb2b}
+#settings .toggle.on:before{left:24px;background:#10170a}
+#settings .choicegroup{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 10px;padding:7px;border:1px solid #29343d;border-radius:15px;background:#10161c}
+#settings #graphicsChoices{grid-template-columns:repeat(4,minmax(0,1fr))}
+#settings .choicegroup button{min-width:0;padding:11px 5px;border:1px solid #303c46;border-radius:10px;background:#19222b;color:#9eacb7;box-shadow:none;font:800 11px/1.2 system-ui;transition:background .15s,border-color .15s,color .15s}
+#settings .choicegroup button.selected{border-color:#c8ff38;background:#c8ff3817;color:#d8ff8a;box-shadow:inset 0 0 0 1px #c8ff3815}
+#settings .setting-note{color:#8998a5;font:500 11px/1.6 system-ui}
+#settings p.setting-note{margin:0 0 10px;padding:10px 13px!important;border:1px solid #29343d!important;border-radius:13px;background:#141b22}
+#settings .optionrow .backbtn{flex:0 0 auto;padding:10px 12px;border:1px solid #c8ff3840;border-radius:10px;background:#c8ff3812;color:#d6ff83;box-shadow:none;font:800 11px system-ui}
+#settings #driverName{display:block;color:#f3f6f8;font:850 14px system-ui}
+#settings a{color:#c8ff70;text-decoration:none}
+@media(max-width:520px){
+ #settings .rr-settings-actions{align-items:flex-start;flex-direction:column}
+ #settings .rr-settings-actions button{width:100%;min-height:40px}
+ #settings .optionrow{padding:12px;gap:10px;font-size:12px}
+ #settings .optionrow .backbtn{max-width:46%;white-space:normal}
+ #settings .choicegroup{gap:5px;padding:6px}
+ #settings .choicegroup button{font-size:10px;padding:11px 3px}
+ #settings .sectionlabel{margin-top:21px}
+}
+
 </style>
 </body></html>
