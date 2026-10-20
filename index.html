@@ -424,6 +424,75 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
  .screenhead .backbtn{padding:8px 8px!important;font-size:14px!important}
 }
 
+
+/* Daily reward banners: full-width, consistent sizing on phones and desktop */
+#home > button.banner.gift,
+#home > button.banner.challenge{
+  display:flex;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  min-height:112px;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:flex-start;
+  gap:16px;
+  padding:18px 20px;
+  margin:0 0 16px;
+  text-align:left;
+  white-space:normal;
+}
+#home > button.banner .bi{
+  flex:0 0 56px;
+  width:56px;
+  font-size:38px;
+  line-height:1.15;
+  text-align:center;
+}
+#home > button.banner > span:last-child{
+  display:block;
+  flex:1 1 auto;
+  min-width:0;
+}
+#home > button.banner b{
+  display:block;
+  font-size:clamp(19px,4.6vw,27px);
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+#home > button.banner small{
+  display:block;
+  font-size:clamp(13px,3.4vw,16px);
+  line-height:1.35;
+  margin-top:4px;
+  overflow-wrap:anywhere;
+}
+#home > button.banner.gift{
+  background:linear-gradient(110deg,#ff8a24,#ffc21d)!important;
+  color:#261608!important;
+  border:1px solid #ffd56c;
+  box-shadow:0 8px 22px #ffae2225,inset 0 1px #ffffff70;
+}
+#home > button.banner.challenge{
+  background:linear-gradient(110deg,#f02f8d,#a24bff)!important;
+  color:#fff!important;
+  border:1px solid #e6a0ff;
+  box-shadow:0 8px 22px #a24bff20,inset 0 1px #ffffff55;
+}
+@media(max-width:520px){
+  #home > button.banner.gift,
+  #home > button.banner.challenge{
+    min-height:112px;
+    padding:16px 15px;
+    gap:11px;
+    border-radius:20px;
+    margin-bottom:15px;
+  }
+  #home > button.banner .bi{flex-basis:44px;width:44px;font-size:33px}
+  #home > button.banner b{font-size:clamp(18px,4.8vw,24px)}
+  #home > button.banner small{font-size:clamp(12px,3.5vw,15px)}
+}
+
 </style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
 <body>
 <main class="app" id="app">
