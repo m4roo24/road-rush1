@@ -5,10 +5,12 @@
   "compatibility_date": "2026-10-19",
   "durable_objects": {
     "bindings": [
-      { "name": "RACE_ROOMS", "class_name": "RaceRoom" },\n      { "name": "LEADERBOARD", "class_name": "LeaderboardStore" }
+      { "name": "RACE_ROOMS", "class_name": "RaceRoom" },
+      { "name": "LEADERBOARD", "class_name": "LeaderboardStore" }
     ]
   },
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["RaceRoom"] },\n    { "tag": "v2", "new_sqlite_classes": ["LeaderboardStore"] }
+    { "tag": "v1", "new_sqlite_classes": ["RaceRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["LeaderboardStore"] }
   ]
 }
