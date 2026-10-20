@@ -1860,7 +1860,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
    const playerX=laneX(g.visualLane??g.lane??Math.floor(laneTotal/2));
    player.position.x+=(playerX-player.position.x)*Math.min(1,dt*9);
    player.position.y=.025+Math.sin(elapsed*speed*.018)*.018;
-   player.rotation.y+=( -(playerX-player.position.x)*.09-player.rotation.y)*Math.min(1,dt*5);
+   player.rotation.y=Math.PI;
    player.rotation.z+=(-((playerX-player.position.x)*.035-player.rotation.z))*Math.min(1,dt*5);
    player.visible=!!g.running&&!g.dead;
    const camClose=prefs.camera==='close',camCinematic=prefs.camera==='cinematic';
@@ -1875,7 +1875,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
     const y=Number(t.y)||0;
     const z=Math.max(-112,Math.min(10,-98+(y/Math.max(1,innerHeight))*105));
     c.position.set(laneX(t.lane),0,z);c.visible=z<8&&z>-110;
-    c.rotation.y=0;
+    c.rotation.y=Math.PI;
    });
    const liveItems=Array.isArray(g.items)?g.items:[];
    itemMeshes.forEach((it,i)=>{
