@@ -740,6 +740,26 @@ function sanitizeIncomingSave(remote){
  if(!Array.isArray(next.jobsClaimed))next.jobsClaimed=[];if(!Array.isArray(next.redeemedCodes))next.redeemedCodes=[];
  return next;
 }
+function mergeRoadRushProgress(local,remote){
+ const base=local&&typeof local==="object"?local:{},cloud=remote&&typeof remote==="object"?remote:{},merged={...base,...cloud};
+ for(const key of ["cash","best","runs","km","jobs","prestige","day","pickups","longestRunKm","challengeKm"])merged[key]=Math.max(0,Number(base[key])||0,Number(cloud[key])||0);
+ if(base.weaponAmmo!==undefined||cloud.weaponAmmo!==undefined)merged.weaponAmmo=Math.max(0,Number(base.weaponAmmo)||0,Number(cloud.weaponAmmo)||0);
+ for(const key of ["unlocked","carsUnlocked","jobsClaimed","redeemedCodes"]){const a=Array.isArray(base[key])?base[key]:[],b=Array.isArray(cloud[key])?cloud[key]:[];merged[key]=[...new Set([...a,...b])];}
+ const latestClaimDate=[String(base.claimDate||""),String(cloud.claimDate||"")].sort().pop();
+ merged.claimDate=latestClaimDate;merged.claimed=latestClaimDate===todayKey()&&((base.claimDate===latestClaimDate&&base.claimed===true)||(cloud.claimDate===latestClaimDate&&cloud.claimed===true));
+ const latestChallengeDate=[String(base.challengeDate||""),String(cloud.challengeDate||"")].sort().pop();merged.challengeDate=latestChallengeDate;
+ if(base.challengeDate===latestChallengeDate&&cloud.challengeDate===latestChallengeDate){merged.challengeDone=base.challengeDone===true||cloud.challengeDone===true;merged.challengeKm=Math.max(Number(base.challengeKm)||0,Number(cloud.challengeKm)||0);}
+ else if(base.challengeDate===latestChallengeDate){merged.challengeDone=base.challengeDone===true;merged.challengeKm=Number(base.challengeKm)||0;}
+ else{merged.challengeDone=cloud.challengeDone===true;merged.challengeKm=Number(cloud.challengeKm)||0;}
+ if(!merged.driver||merged.driver==="Driver")merged.driver=cloud.driver||base.driver||"Driver";
+ const localHasProgress=(Number(base.cash)||0)>0||(Number(base.best)||0)>0||(Number(base.runs)||0)>0||(Number(base.km)||0)>0||(base.unlocked?.length||0)>1||(base.carsUnlocked?.length||0)>1;
+ const lm=Number(base.selectedMap),cm=Number(cloud.selectedMap);
+ merged.selectedMap=localHasProgress&&Number.isInteger(lm)&&merged.unlocked.includes(lm)?lm:Number.isInteger(cm)&&merged.unlocked.includes(cm)?cm:Number.isInteger(lm)&&merged.unlocked.includes(lm)?lm:0;
+ const lc=Number(base.selectedCar),cc=Number(cloud.selectedCar);
+ merged.selectedCar=localHasProgress&&Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:Number.isInteger(cc)&&merged.carsUnlocked.includes(cc)?cc:Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:0;
+ return merged;
+}
+window.mergeRoadRushProgress=mergeRoadRushProgress;
 window.getRoadRushCloudSnapshot=()=>JSON.parse(JSON.stringify(save));
 window.setRoadRushDriverName=function(name){const clean=String(name||'Driver').trim().replace(/[<>]/g,'').slice(0,18)||'Driver';save.driver=clean;persist();updateHome();return clean;};
 window.applyRoadRushCloudSnapshot=function(remote){
@@ -748,7 +768,7 @@ window.applyRoadRushCloudSnapshot=function(remote){
  updateHome();renderMaps();renderGarage();renderJobs();renderAchievements();updateAccountUi();
  return true;
 };
-function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;window.applyRoadRushCloudSnapshot(remote)}
+function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;window.applyRoadRushCloudSnapshot(mergeRoadRushProgress(save,remote))}
 async function loadCloudSave(silent=false){if(!cloudToken)return;try{const r=await apiRequest('/api/save');if(r.save)applyCloudSave(r.save);cloudStatus('Cloud save connected · '+(cloudUser||'player'),'good')}catch(e){cloudStatus((silent?'Cloud sync unavailable: ':'Could not load cloud save: ')+e.message+' · local save kept','error')}}
 function openAccount(){const modal=$('accountModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');updateAccountUi();if(!window.roadFirebaseUser)setTimeout(()=>{if(!window.roadFirebaseUser)$('roadAuthEmail')?.focus()},80)}window.openAccount=openAccount;
 function closeAccount(){const m=$('accountModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}window.closeAccount=closeAccount;
@@ -1215,7 +1235,7 @@ async function roadActivateCloudSave(user){
   const response=await call({action:"load"});
   const data=response.data||{};
   if(data.save&&typeof window.applyRoadRushCloudSnapshot==="function"){
-   window.applyRoadRushCloudSnapshot(mergeRoadRushProgress(localBefore,data.save));
+   window.applyRoadRushCloudSnapshot((window.mergeRoadRushProgress||mergeRoadRushProgress)(localBefore,data.save));
   }else if(typeof window.getRoadRushCloudSnapshot==="function"){
    await call({action:"save",save:window.getRoadRushCloudSnapshot()});
   }
