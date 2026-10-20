@@ -864,7 +864,7 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
  <div class="rr-settings-kicker"><span class="rr-live-dot"></span> DRIVER CONTROL CENTER</div>
  <h2>Make it <span>your race.</span></h2>
  <p>Fine-tune performance, camera, and the look of your drive.</p>
- <div class="rr-settings-chips"><span>⚡ Quick presets</span><span>🎮 Mobile ready</span><span>💾 Auto-saved</span></div>
+ <div class="rr-settings-chips"><span>🏁 Race settings</span><span>🎮 Mobile ready</span><span>💾 Auto-saved</span></div>
 </div>
 <div class="rr-settings-section-title"><span>01 / 3D EXPERIENCE</span><small>Personalize your camera and world</small></div>
 <div class="rr-settings-card">
@@ -2032,5 +2032,35 @@ let THREE;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.165.0/bui
 #roadCanvas{display:block!important;visibility:visible!important;opacity:1!important}
 #gameview.road3d-ready #roadCanvas{visibility:visible!important}
 #road3dCanvas{display:none!important;visibility:hidden!important}
+
+/* Unified settings appearance */
+#settings{--settings-panel:#111923;--settings-panel-2:#17212b;--settings-border:#2a3742;--settings-accent:#c8ff38}
+#settings .rr-settings-hero{border:1px solid var(--settings-border);border-radius:18px;background:linear-gradient(145deg,#17212b,#10161e);box-shadow:none}
+#settings .rr-settings-hero:after{color:#c8ff3808}
+#settings .rr-settings-kicker,#settings .rr-settings-section-title span{color:var(--settings-accent)}
+#settings .rr-settings-section-title{margin:22px 0 10px;padding:0 2px}
+#settings .rr-settings-section-title small{color:#aab5c0}
+#settings .rr-settings-card{box-sizing:border-box;padding:15px;margin:0 0 14px;border:1px solid var(--settings-border);border-radius:16px;background:var(--settings-panel);box-shadow:none}
+#settings .rr-settings-feature{gap:12px}
+#settings .rr-feature-symbol{width:40px;height:40px;display:grid;place-items:center;flex:0 0 40px;border:1px solid var(--settings-border);border-radius:12px;background:var(--settings-panel-2)}
+#settings .rr-settings-divider{background:var(--settings-border)}
+#settings .sectionlabel{display:flex;align-items:center;gap:10px;margin:22px 0 0;padding:13px 15px;border:1px solid var(--settings-border);border-bottom:0;border-radius:15px 15px 0 0;background:var(--settings-panel-2);color:#c8ff38;font:900 12px/1.3 system-ui,sans-serif;letter-spacing:1.2px;text-transform:uppercase}
+#settings .optionrow{box-sizing:border-box;min-height:60px;margin:0;padding:13px 15px;border:1px solid var(--settings-border);border-top:0;background:var(--settings-panel);font:700 14px/1.45 system-ui,sans-serif;color:#edf2f7}
+#settings .optionrow .setting-note{font-size:12px}
+#settings .choicegroup{gap:7px;margin:0;padding:12px 14px;border:1px solid var(--settings-border);border-top:0;background:var(--settings-panel)}
+#settings .choicegroup button{min-height:43px;padding:10px 8px;border:1px solid #334250;border-radius:10px;background:#202c37;box-shadow:none;color:#e7edf2;font:800 12px/1.2 system-ui,sans-serif}
+#settings .choicegroup button.selected{border-color:var(--settings-accent);background:var(--settings-accent);color:#17200d}
+#settings .toggle{width:48px;height:28px;min-width:48px;border:1px solid #3a4855;border-radius:999px;background:#35424e;box-shadow:none}
+#settings .toggle:before{width:20px;height:20px;top:3px;left:3px;box-shadow:none}
+#settings .toggle.on{background:var(--settings-accent);border-color:var(--settings-accent)}
+#settings .toggle.on:before{left:23px;background:#17200d}
+#settings .slider{width:min(48%,220px);accent-color:var(--settings-accent)}
+#settings .setting-note{color:#9eacb9;font-size:12px;line-height:1.55}
+#settings .rr-settings-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border:1px solid var(--settings-border);border-radius:14px;background:var(--settings-panel)}
+#settings .rr-settings-actions button{border:1px solid #394957;border-radius:10px;background:#202c37;color:#edf2f7;padding:11px 13px;font:800 11px system-ui,sans-serif}
+#settings .rr-settings-actions span{color:#9eacb9;font:600 11px system-ui,sans-serif}
+#settings .rr-settings-chips span{border-color:var(--settings-border);background:#ffffff05}
+@media(max-width:520px){#settings .rr-settings-hero{padding:17px 15px}#settings .rr-settings-card{padding:12px}#settings .optionrow{gap:10px;padding:12px 11px;font-size:13px}#settings .sectionlabel{padding:12px 11px}#settings .choicegroup{padding:10px 9px;gap:6px}#settings .choicegroup button{font-size:11px;padding:9px 5px}}
+
 </style>
 </body></html>
