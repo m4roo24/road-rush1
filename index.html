@@ -1223,34 +1223,51 @@ function mergeRoadRushProgress(local, remote){
  merged.selectedCar=localHasProgress&&Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:Number.isInteger(cc)&&merged.carsUnlocked.includes(cc)?cc:Number.isInteger(lc)&&merged.carsUnlocked.includes(lc)?lc:0;
  return merged;
 }
-async function roadActivateCloudSave(user){
- if(!user||!roadFunctions)return;
- roadCloudReady=false;
+let roadCloudActivationPromise=null,roadCloudUid="";
+async function connectRoadCloudSave(user){
+ if(!user||!roadFunctions)return false;
+ roadCloudReady=false;roadCloudUid="";
  try{
   const token=await user.getIdTokenResult();
   const provider=token.claims.firebase?.sign_in_provider||"";
   if(provider==="password"&&token.claims.emailOtpVerified!==true){
    setRoadCloudState("Verify your six-digit email code to enable secure cloud saves.",false);
-   return;
+   return false;
   }
-  setRoadCloudState("Restoring account progress…");
+  setRoadCloudState("Connecting cloud save and restoring account progress…");
   const localBefore=window.getRoadRushCloudSnapshot?.()||{};
   const call=httpsCallable(roadFunctions,"savePlayerProgress");
   const response=await call({action:"load"});
+  if(roadAuth?.currentUser?.uid!==user.uid)return false;
   const data=response.data||{};
   if(data.save&&typeof window.applyRoadRushCloudSnapshot==="function"){
    window.applyRoadRushCloudSnapshot((window.mergeRoadRushProgress||mergeRoadRushProgress)(localBefore,data.save));
   }else if(typeof window.getRoadRushCloudSnapshot==="function"){
    await call({action:"save",save:window.getRoadRushCloudSnapshot()});
   }
-  roadCloudReady=true;
+  if(roadAuth?.currentUser?.uid!==user.uid)return false;
+  roadCloudReady=true;roadCloudUid=user.uid;
   if(data.save)window.queueRoadRushCloudSave?.();
-  setRoadCloudState("Cloud saved · cash, cars, maps, settings and progress are synced.");
+  setRoadCloudState("Cloud save connected · progress is synced to your account.");
+  return true;
  }catch(error){
-  roadCloudReady=false;
+  roadCloudReady=false;roadCloudUid="";
   setRoadCloudState("Cloud save unavailable: "+(error.message||"check Firebase Functions deployment"),true);
   roadAuthStatus("You are signed in, but cloud sync failed: "+(error.message||"unknown error"),true);
+  return false;
  }
+}
+async function roadActivateCloudSave(user){
+ if(!user||!roadFunctions)return false;
+ if(roadCloudReady&&roadCloudUid===user.uid)return true;
+ if(roadCloudActivationPromise){
+  await roadCloudActivationPromise;
+  if(roadCloudReady&&roadCloudUid===user.uid)return true;
+ }
+ const pending=connectRoadCloudSave(user);
+ roadCloudActivationPromise=pending;
+ try{return await pending}
+ finally{if(roadCloudActivationPromise===pending)roadCloudActivationPromise=null}
 }
 window.roadActivateCloudSave=roadActivateCloudSave;
 window.queueRoadRushCloudSave=function(){
@@ -1269,10 +1286,14 @@ window.queueRoadRushCloudSave=function(){
  },850)
 };
 window.roadRedeemSpecialCode=async function(code){
- if(!roadAuth?.currentUser||!roadFunctions)throw new Error("Sign in with Google or verified email first.");
- if(!roadCloudReady)await roadActivateCloudSave(roadAuth.currentUser);
- if(!roadCloudReady)throw new Error("Cloud save must connect before using the global one-time reward code.");
- const token=await roadAuth.currentUser.getIdTokenResult();
+ const user=roadAuth?.currentUser;
+ if(!user||!roadFunctions)throw new Error("Sign in with Google or verified email first.");
+ if(!roadCloudReady||roadCloudUid!==user.uid){
+  const connected=await roadActivateCloudSave(user);
+  if(!connected||!roadCloudReady||roadCloudUid!==user.uid)throw new Error(window.roadCloudSaveState||"Cloud save could not connect. Open Cloud Save, wait for the connected status, then try again.");
+ }
+ if(roadAuth?.currentUser?.uid!==user.uid)throw new Error("Your account changed. Sign in again before redeeming this code.");
+ const token=await user.getIdTokenResult();
  if(token.claims.firebase?.sign_in_provider==="password"&&token.claims.emailOtpVerified!==true)throw new Error("Verify the six-digit email code before redeeming this account-only code.");
  const result=await httpsCallable(roadFunctions,"redeemRoadRushCode")({code});
  if(!result.data?.ok||!result.data?.save)throw new Error("The reward service returned an invalid response.");
