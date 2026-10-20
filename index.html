@@ -704,7 +704,7 @@ function apiRequest(route,options={}){const base=apiBase();const headers={'Conte
 function cloudStatus(text,kind=''){const e=$('accountStatus');if(e){e.textContent=text;e.classList.remove('error','good');if(kind)e.classList.add(kind)}const st=$('saveStatus');if(st)st.textContent=text;const label=$('cloudButtonLabel');const firebaseUser=window.roadFirebaseUser;if(label)label.textContent=cloudToken?'Cloud save: '+(cloudUser||'connected'):firebaseUser?'Signed in: '+(firebaseUser.displayName||firebaseUser.email||'driver'):'Sign in to save online';}
 function queueCloudSave(){clearTimeout(cloudTimer);cloudTimer=setTimeout(async()=>{if(!cloudToken)return;if(cloudSyncBusy){queueCloudSave();return}cloudSyncBusy=true;const snapshot=JSON.stringify(save);let succeeded=false;try{await apiRequest('/api/save',{method:'PUT',body:JSON.stringify({save:JSON.parse(snapshot)})});cloudLastSaved=snapshot;succeeded=true;cloudStatus('Cloud save synced · '+(cloudUser||'connected'),'good')}catch(e){cloudStatus('Cloud sync failed: '+e.message+' · local save kept','error')}finally{cloudSyncBusy=false;if(succeeded&&cloudToken&&JSON.stringify(save)!==snapshot)queueCloudSave()}},900)}
 function applyCloudSave(remote){if(!remote||typeof remote!=='object')return;save={...defaults,...remote};if(!Array.isArray(save.unlocked))save.unlocked=[0];if(!save.unlocked.includes(0))save.unlocked.unshift(0);if(!Array.isArray(save.carsUnlocked))save.carsUnlocked=[0];if(!save.carsUnlocked.includes(0))save.carsUnlocked.unshift(0);if(!Array.isArray(save.jobsClaimed))save.jobsClaimed=[];if(!Array.isArray(save.redeemedCodes))save.redeemedCodes=[];try{localStorage.setItem('cargo_run_save',JSON.stringify(save))}catch(e){}updateHome();renderMaps();renderGarage();renderJobs();renderAchievements();updateAccountUi();}
-async async function loadCloudSave(silent=false){if(!cloudToken)return;try{const r=await apiRequest('/api/save');if(r.save)applyCloudSave(r.save);cloudStatus('Cloud save connected · '+(cloudUser||'player'),'good')}catch(e){cloudStatus((silent?'Cloud sync unavailable: ':'Could not load cloud save: ')+e.message+' · local save kept','error')}}
+async function loadCloudSave(silent=false){if(!cloudToken)return;try{const r=await apiRequest('/api/save');if(r.save)applyCloudSave(r.save);cloudStatus('Cloud save connected · '+(cloudUser||'player'),'good')}catch(e){cloudStatus((silent?'Cloud sync unavailable: ':'Could not load cloud save: ')+e.message+' · local save kept','error')}}
 function openAccount(){const modal=$('accountModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');updateAccountUi();if(!window.roadFirebaseUser)setTimeout(()=>{if(!window.roadFirebaseUser)$('roadAuthEmail')?.focus()},80)}window.openAccount=openAccount;
 function closeAccount(){const m=$('accountModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}window.closeAccount=closeAccount;
 function updateAccountUi(){
@@ -1117,7 +1117,7 @@ function initRoadAuth() {
     return false;
   }
 }
-async async function roadSendOtp() {
+async function roadSendOtp() {
   const requestEmailOtp = httpsCallable(roadFunctions, "requestEmailOtp");
   await requestEmailOtp({});
   roadOtpPending = true;
