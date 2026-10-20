@@ -1,4 +1,4 @@
-const CACHE_NAME = 'road-rush-shell-v15-kuw-code';
+const CACHE_NAME = 'road-rush-shell-v16-start-crash-fix';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './road-rush-logo.svg', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
