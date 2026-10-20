@@ -44,7 +44,7 @@ function mailTransport() {
 }
 
 exports.requestEmailOtp = onCall({
-  enforceAppCheck: true,
+  enforceAppCheck: false,
   secrets: [SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, OTP_HASH_SECRET]
 }, async (request) => {
   const { uid, email } = requirePasswordUser(request);
@@ -88,7 +88,7 @@ exports.requestEmailOtp = onCall({
 });
 
 exports.verifyEmailOtp = onCall({
-  enforceAppCheck: true,
+  enforceAppCheck: false,
   secrets: [OTP_HASH_SECRET]
 }, async (request) => {
   const { uid } = requirePasswordUser(request);
