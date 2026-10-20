@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">Road Rush</title><desc id="desc">A racing-inspired Road Rush emblem with a neon yellow road and speed stripes.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#20344b"/><stop offset="1" stop-color="#07111e"/></linearGradient>
+ <linearGradient id="yellow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff07a"/><stop offset=".52" stop-color="#ffce24"/><stop offset="1" stop-color="#ff8e19"/></linearGradient>
+ <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#aeb9c8"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="#050b13"/>
+<rect x="11" y="11" width="490" height="490" rx="103" fill="url(#bg)" stroke="#3b5166" stroke-width="5"/>
+<path d="M-12 151 200 55 132 107 -9 176ZM-10 235 190 150 145 186 -8 254ZM310 70l212 -83 -67 58 -160 61ZM364 147l158 -62 -62 54 -125 47Z" fill="#ffb824" opacity=".95"/>
+<path d="M79 100h354l-36 38H106z" fill="#0b1524" stroke="#62748a" stroke-width="5"/>
+<path d="M100 128h312l-34 223q-2 15-17 15H151q-15 0-17-15z" fill="#080f1b" stroke="#53677e" stroke-width="5"/>
+<path d="M221 146h70l-16 53h-38zM202 221h108l-15 49H217zM183 290h146l-14 44H197z" fill="#fff0ae" opacity=".95"/>
+<path d="M128 152 92 381l52-15 41-214zM384 152l36 229-52-15-41-214z" fill="url(#yellow)" stroke="#111a28" stroke-width="8" stroke-linejoin="round"/>
+<path d="M159 183h85c55 0 65 66 12 89l44 69h-62l-36-63h-10v63h-54V183zm55 44v26h27c15 0 15-26 0-26z" fill="url(#silver)" stroke="#06101b" stroke-width="9" stroke-linejoin="round"/>
+<path d="M267 183h90c52 0 66 61 21 85l43 73h-63l-37-62h-3v62h-53V183zm53 44v26h28c15 0 15-26 0-26z" fill="url(#yellow)" stroke="#06101b" stroke-width="9" stroke-linejoin="round"/>
+<path d="M77 409h358" stroke="#f5bd28" stroke-width="7" stroke-linecap="round"/>
+<path d="M112 432h288" stroke="#49ddbd" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+</svg>
