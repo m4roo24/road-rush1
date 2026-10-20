@@ -777,12 +777,12 @@ body{background:radial-gradient(ellipse at 50% -18%,#243344 0,transparent 45%),l
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
 </style>
 <style id="road-rush-3d-renderer-style">
-#roadCanvas{visibility:hidden!important}
+#roadCanvas{display:none!important}
 #gameview.road3d-ready #roadCanvas{visibility:hidden!important}
 #road3dCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}
 #gameview>*:not(#roadCanvas):not(#road3dCanvas){z-index:2}
 #gameview{isolation:isolate}
-#gameview:not(.road3d-ready) #roadCanvas{visibility:visible!important}
+#gameview:not(.road3d-ready) #roadCanvas{display:block!important}
 </style>
 <style id="road-rush-settings-premium-v2">
 #settings.screen{padding-bottom:calc(36px + env(safe-area-inset-bottom))}
@@ -1126,7 +1126,7 @@ function sound(freq=440,dur=.08){if(!settings.sound)return;const a=ensureAudio()
 // Top-down road and lane-change survival loop.
 const canvas=$('roadCanvas'),ctx=canvas.getContext('2d',{alpha:false,desynchronized:true});let W=0,H=0,dpr=1,raf=0,last=0,game={running:false,paused:false,dead:false,lane:1,visualLane:1,speed:31,km:0,cash:0,elapsed:0,traffic:[],items:[],boss:null,bossBullets:[],bossLevel:0,bossNextAt:300,bossWarningFor:0,weaponAmmo:0,roadOffset:0,spawn:0,fuel:100,runNumber:0,shake:0,passiveCash:0,magnetTime:0,boostTime:0,runFinalized:false,fpsEMA:60,graphicsTimer:0,padLeft:false,padRight:false};let laneCount=3;let audioStarted=false;let helpHideTimer=0;
 function resize(){const mobile=matchMedia('(max-width: 760px)').matches;const dprCap=settings.graphics==='Ultra'?(mobile?1.35:1.75):settings.graphics==='High'?(mobile?1.2:1.4):settings.graphics==='Medium'?(mobile?1.05:1.2):1;dpr=Math.min(devicePixelRatio||1,dprCap);W=canvas.clientWidth=innerWidth;H=canvas.clientHeight=innerHeight;canvas.width=Math.max(1,Math.floor(W*dpr));canvas.height=Math.max(1,Math.floor(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
-window.__roadRush3DState=()=>({game,save,settings});
+window.__roadRush3DState=()=>({game,save,settings,laneCount});
 window.syncSettings=syncSettings;
 function drawCar(x,y,w,h,color,player=false,kind='car',lean=0){
  ctx.save();ctx.translate(x,y);ctx.rotate(lean);if(!player)ctx.rotate(Math.PI);
@@ -1786,7 +1786,7 @@ initRoadAuth();
  if(typeof quit==='function')window.quitGame=function(...args){setCleanHud(false);return quit.apply(this,args)};
 })();
 </script>
-<script>window.__ROAD_RUSH_BUILD__="2026-10-20-nextgen-ui-hud-toggle";</script>
+<script>window.__ROAD_RUSH_BUILD__="2026-10-20-full-3d-gameplay-sync";</script>
 <script type="module" id="road-rush-3d-renderer">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 (()=>{
@@ -1838,8 +1838,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
   }
   player=makeCar(0xeab72d,true);player.position.set(0,0,3);scene.add(player);
   const trafficColors=[0xd84843,0x4b93d1,0xe9ecef,0x3eaa78,0xb18ae8,0xe8a14b];
-  for(let i=0;i<10;i++){const c=makeCar(trafficColors[i%trafficColors.length]);c.scale.setScalar(.86);trafficGroup.add(c);traffic.push(c)}
-  view.classList.add('road3d-ready');old.style.visibility='hidden';
+  for(let i=0;i<32;i++){const c=makeCar(trafficColors[i%trafficColors.length]);c.scale.setScalar(.86);trafficGroup.add(c);traffic.push(c)}
+  const itemGroup=new THREE.Group();world.add(itemGroup);const itemMeshes=[];
+  for(let i=0;i<24;i++){const group=new THREE.Group(),coin=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.09,20),mat(0xffd34e,.28,.55));coin.rotation.x=Math.PI/2;group.add(coin);const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.42,0),mat(0x62e6ff,.22,.4));gem.position.y=.1;gem.visible=false;group.add(gem);const boost=new THREE.Mesh(new THREE.TorusGeometry(.34,.11,8,18),mat(0x8b72ff,.22,.35));boost.position.y=.1;boost.visible=false;group.add(boost);itemGroup.add(group);itemMeshes.push({group,coin,gem,boost})}
+  view.classList.add('road3d-ready');old.style.display='none';
   function sixty(){return 60}
   function resize(){const w=innerWidth,h=innerHeight;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
   addEventListener('resize',resize,{passive:true});
@@ -1853,9 +1855,37 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.m
    scene.background.setHex(sky);scene.fog.color.setHex(sky);grassMat.color.setHex(prefs.atmosphere==='night'?(snow?0x313d4d:desert?0x493d37:0x182d28):ground);
    roadGroup.position.z=(offset*.035)%10;
    props.forEach((p,i)=>{const base=-(i*11+8);p.position.z=base+((offset*.065)%145);if(p.position.z>12)p.position.z-=145});
-   player.position.x+=(lane*1.75-player.position.x)*Math.min(1,dt*7);player.position.y=.03+Math.sin(elapsed*speed*.018)*.018;player.rotation.z+=( -((lane*1.75-player.position.x)*.06)-player.rotation.z)*Math.min(1,dt*4);
-   const camClose=prefs.camera==='close',camCinematic=prefs.camera==='cinematic';camera.position.x+=(player.position.x*(camCinematic?.12:.24)-camera.position.x)*Math.min(1,dt*1.8);camera.position.y=(camClose?3.8:camCinematic?6.8:5.1)+Math.min(speed/260,.55);camera.position.z=camClose?7.7:camCinematic?13.5:10.5;camera.lookAt(player.position.x*(camCinematic?.1:.2),.2,camCinematic?-18:-13);
-   traffic.forEach((c,i)=>{const z=-12-((i*17+elapsed*(2.5+speed*.018))%105);c.position.z=z;c.position.x=([-3.5,-1.75,0,1.75,3.5][(i*3+Math.floor(i/2))%5]);c.visible=z<4&&z>-105});
+   const laneTotal=Math.max(3,Math.min(5,Number(g.laneCount)||3));
+   const laneX=n=>(Number(n)-(laneTotal-1)/2)*1.75;
+   const playerX=laneX(g.visualLane??g.lane??Math.floor(laneTotal/2));
+   player.position.x+=(playerX-player.position.x)*Math.min(1,dt*9);
+   player.position.y=.025+Math.sin(elapsed*speed*.018)*.018;
+   player.rotation.y+=( -(playerX-player.position.x)*.09-player.rotation.y)*Math.min(1,dt*5);
+   player.rotation.z+=(-((playerX-player.position.x)*.035-player.rotation.z))*Math.min(1,dt*5);
+   player.visible=!!g.running&&!g.dead;
+   const camClose=prefs.camera==='close',camCinematic=prefs.camera==='cinematic';
+   camera.position.x+=(player.position.x*(camCinematic?.12:.24)-camera.position.x)*Math.min(1,dt*2.4);
+   camera.position.y=(camClose?3.8:camCinematic?6.8:5.1)+Math.min(speed/260,.55);
+   camera.position.z=camClose?7.7:camCinematic?13.5:10.5;
+   camera.lookAt(player.position.x*(camCinematic?.1:.2),.2,camCinematic?-18:-13);
+   const liveTraffic=Array.isArray(g.traffic)?g.traffic:[];
+   traffic.forEach((c,i)=>{
+    const t=liveTraffic[i];
+    if(!t){c.visible=false;return}
+    const y=Number(t.y)||0;
+    const z=Math.max(-112,Math.min(10,-98+(y/Math.max(1,innerHeight))*105));
+    c.position.set(laneX(t.lane),0,z);c.visible=z<8&&z>-110;
+    c.rotation.y=0;
+   });
+   const liveItems=Array.isArray(g.items)?g.items:[];
+   itemMeshes.forEach((it,i)=>{
+    const t=liveItems[i];
+    if(!t){it.group.visible=false;return}
+    const y=Number(t.y)||0,z=Math.max(-112,Math.min(10,-98+(y/Math.max(1,innerHeight))*105));
+    it.group.visible=z<8&&z>-110;it.group.position.set(laneX(t.lane),.72+Math.sin(elapsed*4+(t.phase||0))*.12,z);
+    it.coin.visible=t.type==='gold'||t.type==='diamond';it.gem.visible=t.type==='diamond';it.boost.visible=t.type==='boost'||t.type==='magnet';
+    it.group.rotation.y=elapsed*1.8+(t.phase||0);
+   });
    if(active){renderer.render(scene,camera)}else{renderer.render(scene,camera)}
   }
   requestAnimationFrame(render);
