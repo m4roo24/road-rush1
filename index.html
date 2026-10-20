@@ -498,6 +498,87 @@ button:focus-visible{outline:2px solid #d6b36a;outline-offset:3px}
   #home > button.banner small{font-size:clamp(12px,3.5vw,15px)}
 }
 
+
+/* Compact mobile header, vehicle illustration, and home reward cards */
+@media(max-width:600px){
+  .brandrow{
+    margin:0 0 13px!important;
+    padding:4px 0 9px!important;
+    min-height:0!important;
+  }
+  .brand-logo{
+    width:30px!important;
+    height:30px!important;
+  }
+  .save{
+    padding:7px 10px!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+  }
+  .vehicle-card{
+    padding:12px 14px 15px!important;
+    gap:0!important;
+    margin-bottom:14px!important;
+  }
+  .truckstage{
+    height:116px!important;
+    margin:0 0 8px!important;
+    overflow:hidden;
+  }
+  .truckstage svg{
+    height:116px!important;
+    max-height:116px!important;
+    width:100%;
+    display:block;
+  }
+  .vehicle-card .vehicle-name,
+  .vehicle-card h2{
+    line-height:1.02;
+  }
+  .bannerrow{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    margin-top:0!important;
+  }
+  #home > button.banner.gift,
+  #home > button.banner.challenge{
+    width:100%!important;
+    min-height:70px!important;
+    height:auto!important;
+    box-sizing:border-box!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    border-radius:16px!important;
+    gap:9px!important;
+    align-items:center!important;
+  }
+  #home > button.banner .bi{
+    flex:0 0 36px!important;
+    width:36px!important;
+    font-size:27px!important;
+    line-height:1!important;
+  }
+  #home > button.banner > span:last-child{
+    min-width:0!important;
+    flex:1 1 auto!important;
+  }
+  #home > button.banner b{
+    font-size:clamp(18px,4.6vw,22px)!important;
+    line-height:1.12!important;
+    letter-spacing:0!important;
+  }
+  #home > button.banner small{
+    font-size:12px!important;
+    line-height:1.25!important;
+    margin-top:3px!important;
+  }
+  #home > button.banner small[style]{
+    margin-top:4px!important;
+    letter-spacing:2px!important;
+    font-size:10px!important;
+  }
+}
+
 </style><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icon-192.png"></head>
 <body>
 <main class="app" id="app">
